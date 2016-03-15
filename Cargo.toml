@@ -1,0 +1,10 @@
+[package]
+name = "asyncplify"
+version = "0.1.0"
+authors = ["Dany Laporte <dany_laporte@hotmail.com>"]
+description = "Library for functional reactive programming (RX like)"
+homepage = "https://github.com/danylaporte/rust-asyncplify"
+repository = "https://github.com/danylaporte/rust-asyncplify"
+readme = "README.md"
+keywords = ["frp", "reactive", "event", "rx", "async"]
+license = "MIT"
