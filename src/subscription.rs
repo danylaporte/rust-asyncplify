@@ -1,12 +1,24 @@
 use std::marker::PhantomData;
+use std::mem;
+use std::option::*;
 use std::rc::Rc;
 use consumer::*;
 use producer::*;
 use stream::*;
 
+/// Represents a subscription to a `Stream`
 pub struct Subscription<I> {
     producer: Option<Rc<Producer>>,
     marker: PhantomData<I>,
+}
+
+impl<I> Subscription<I> {
+    /// Closes the `Subscription<I>`
+    pub fn close(mut self) {
+        if let Some(p) = mem::replace(&mut self.producer, None) {
+            p.close();
+        }
+    }
 }
 
 impl<I> Consumer for Subscription<I> {
