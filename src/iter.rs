@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::marker::PhantomData;
 use consumer::*;
 use producer::*;
 use stream::*;

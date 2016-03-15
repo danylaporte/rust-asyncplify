@@ -1,9 +1,7 @@
 use std::prelude::v1::*;
-use std::marker::PhantomData;
 use std::ops::Add;
 use consumer::*;
 use fold::*;
-use subscription::*;
 
 pub trait Stream {
     type Item;

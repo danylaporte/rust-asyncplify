@@ -1,5 +1,4 @@
 use std::cell::Cell;
-use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ProducerState {
@@ -22,6 +21,10 @@ impl Producer {
 
     pub fn new() -> Producer {
         Producer::from_func(Box::new(|_| {}))
+    }
+    
+    pub fn set_func(&mut self, func: Box<Fn(ProducerState)>) {
+        self.func = func;
     }
 
     pub fn is_closed(&self) -> bool {

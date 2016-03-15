@@ -7,8 +7,8 @@ use stream::*;
 struct MapState<C, F, I, O> {
     consumer: C,
     func: F,
-    markerI: PhantomData<I>,
-    markerO: PhantomData<O>,
+    marker_i: PhantomData<I>,
+    marker_o: PhantomData<O>,
 }
 
 pub struct MapStream<S, F, O> {
@@ -48,8 +48,8 @@ impl<S, F, O> Stream for MapStream<S, F, O>
         self.stream.consume(MapState {
             consumer: consumer,
             func: self.func,
-            markerI: PhantomData::<S::Item>,
-            markerO: PhantomData::<Self::Item>,
+            marker_i: PhantomData::<S::Item>,
+            marker_o: PhantomData::<Self::Item>,
         });
     }
 }

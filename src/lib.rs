@@ -1,10 +1,3 @@
-use std::default::Default;
-use std::ops;
-use std::rc::Rc;
-use std::cell::Cell;
-use std::marker::PhantomData;
-
-
 mod consumer;
 mod filter;
 mod fold;
@@ -16,29 +9,20 @@ mod subscription;
 mod tap;
 mod value;
 
-use consumer::*;
-use filter::*;
-use fold::*;
-use iter::*;
-use map::*;
-use producer::*;
-use stream::*;
-use subscription::*;
-use tap::*;
-use value::*;
+pub use consumer::*;
+pub use filter::*;
+pub use fold::*;
+pub use iter::*;
+pub use map::*;
+pub use producer::*;
+pub use stream::*;
+pub use subscription::*;
+pub use tap::*;
+pub use value::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use consumer::*;
-    use filter::*;
-    use fold::*;
-    use iter::*;
-    use map::*;
-    use producer::*;
-    use stream::*;
-    use subscription::*;
-    use tap::*;
 
     #[test]
     fn it_works() {

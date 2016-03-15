@@ -8,6 +8,17 @@ pub struct ValueStream<T> {
 }
 
 impl<T> ValueStream<T> {
+    /// Constructs a new `ValueStream<T>`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// ValueStream::new(5)
+    ///     .tap(|v| println!("{}", v))
+    ///     .subscribe();
+    /// ```
     pub fn new(value: T) -> Self {
         ValueStream { value: value }
     }
