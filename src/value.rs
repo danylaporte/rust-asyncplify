@@ -24,8 +24,7 @@ impl<T> Value<T> {
     }
 }
 
-impl<T> Stream for Value<T>
-    where T: Clone
+impl<T> Stream for Value<T> where T: Clone
 {
     type Item = T;
 
@@ -33,13 +32,13 @@ impl<T> Stream for Value<T>
         where C: Consumer<Item = Self::Item>
     {
         let producer = Rc::new(Producer::new());
-        
+
         consumer.init(producer.clone());
-        
+
         if !producer.is_closed() {
             consumer.emit(self.value.clone());
         }
-        
+
         if !producer.is_closed() {
             consumer.end();
         }

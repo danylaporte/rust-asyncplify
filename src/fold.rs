@@ -67,7 +67,7 @@ pub trait FoldableStream: Stream {
             func: func,
         }
     }
-    
+
     fn sum<O>(self) -> Fold<Self, fn(&O, Self::Item) -> O, O>
         where Self: Sized,
               O: Add<Self::Item, Output = O> + Default + Copy
