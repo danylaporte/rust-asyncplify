@@ -3,28 +3,28 @@ use consumer::*;
 use producer::*;
 use stream::*;
 
-pub struct ValueStream<T> {
+pub struct Value<T> {
     value: T,
 }
 
-impl<T> ValueStream<T> {
-    /// Constructs a new `ValueStream<T>`.
+impl<T> Value<T> {
+    /// Constructs a new `Stream` based on a `Value<T>`.
     ///
     /// # Examples
     ///
     /// ```
     /// use asyncplify::*;
     ///
-    /// ValueStream::new(5)
+    /// Value::new(5)
     ///     .tap(|v| println!("{}", v))
     ///     .subscribe();
     /// ```
     pub fn new(value: T) -> Self {
-        ValueStream { value: value }
+        Value { value: value }
     }
 }
 
-impl<T> Stream for ValueStream<T>
+impl<T> Stream for Value<T>
     where T: Clone
 {
     type Item = T;

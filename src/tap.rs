@@ -10,7 +10,7 @@ struct TapState<C, F, T> {
     marker: PhantomData<T>,
 }
 
-pub struct TapStream<S, F> {
+pub struct Tap<S, F> {
     stream: S,
     func: F,
 }
@@ -35,7 +35,7 @@ impl<C, F, T> Consumer for TapState<C, F, T>
     }
 }
 
-impl<S, F> Stream for TapStream<S, F>
+impl<S, F> Stream for Tap<S, F>
     where S: Stream,
           F: FnMut(&S::Item)
 {
@@ -53,11 +53,11 @@ impl<S, F> Stream for TapStream<S, F>
 }
 
 pub trait  TappableStream : Stream {
-    fn tap<F>(self, func: F) -> TapStream<Self, F>
+    fn tap<F>(self, func: F) -> Tap<Self, F>
         where F: FnMut(&Self::Item),
               Self: Sized
     {
-        TapStream {
+        Tap {
             stream: self,
             func: func,
         }

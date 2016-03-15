@@ -31,12 +31,12 @@ impl<C, F, T> Consumer for FilterState<C, F, T>
     }
 }
 
-pub struct FilterStream<S, F> {
+pub struct Filter<S, F> {
     stream: S,
     func: F,
 }
 
-impl<S, F> Stream for FilterStream<S, F>
+impl<S, F> Stream for Filter<S, F>
     where S: Stream,
           F: Fn(&<S as Stream>::Item) -> bool
 {
@@ -54,11 +54,11 @@ impl<S, F> Stream for FilterStream<S, F>
 }
 
 pub trait FilterableStream : Stream {
-    fn filter<F>(self, func: F) -> FilterStream<Self, F>
+    fn filter<F>(self, func: F) -> Filter<Self, F>
         where Self: Sized,
               F: Fn(&Self::Item) -> bool
     {
-        FilterStream {
+        Filter {
             stream: self,
             func: func,
         }

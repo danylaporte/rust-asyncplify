@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::ops::Add;
 use std::rc::Rc;
 use consumer::*;
 use producer::*;
@@ -31,13 +32,13 @@ impl<C, F, I, O> Consumer for FoldState<C, F, I, O>
     }
 }
 
-pub struct FoldStream<S, F, O> {
+pub struct Fold<S, F, O> {
     stream: S,
     func: F,
     initial: O,
 }
 
-impl<S, F, O> Stream for FoldStream<S, F, O>
+impl<S, F, O> Stream for Fold<S, F, O>
     where S: Stream,
           F: Fn(&O, <S as Stream>::Item) -> O
 {
@@ -56,15 +57,28 @@ impl<S, F, O> Stream for FoldStream<S, F, O>
 }
 
 pub trait FoldableStream: Stream {
-    fn fold<O, F>(self, initial: O, func: F) -> FoldStream<Self, F, O>
+    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, F, O>
         where Self: Sized,
               F: Fn(&O, Self::Item) -> O
     {
-        FoldStream {
+        Fold {
             stream: self,
             initial: initial,
             func: func,
         }
+    }
+    
+    fn sum<O>(self) -> Fold<Self, fn(&O, Self::Item) -> O, O>
+        where Self: Sized,
+              O: Add<Self::Item, Output = O> + Default + Copy
+    {
+        fn adder<O, I>(v: &O, i: I) -> O
+            where O: Add<I, Output = O> + Copy
+        {
+            *v + i
+        }
+
+        self.fold(Default::default(), adder)
     }
 }
 

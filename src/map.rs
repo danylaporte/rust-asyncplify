@@ -11,7 +11,7 @@ struct MapState<C, F, I, O> {
     marker_o: PhantomData<O>,
 }
 
-pub struct MapStream<S, F, O> {
+pub struct Map<S, F, O> {
     stream: S,
     func: F,
     marker: PhantomData<O>,
@@ -36,7 +36,7 @@ impl<C, F, I, O> Consumer for MapState<C, F, I, O>
     }
 }
 
-impl<S, F, O> Stream for MapStream<S, F, O>
+impl<S, F, O> Stream for Map<S, F, O>
     where S: Stream,
           F: Fn(S::Item) -> O
 {
@@ -55,11 +55,11 @@ impl<S, F, O> Stream for MapStream<S, F, O>
 }
 
 pub trait  MappableStream : Stream {
-    fn map<O, F>(self, func: F) -> MapStream<Self, F, O>
+    fn map<O, F>(self, func: F) -> Map<Self, F, O>
         where Self: Sized,
               F: Fn(Self::Item) -> O
     {
-        MapStream {
+        Map {
             stream: self,
             func: func,
             marker: PhantomData::<O>,
