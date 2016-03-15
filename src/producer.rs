@@ -28,7 +28,9 @@ impl Producer {
     }
 
     pub fn close(&self) {
-        self.state.set(ProducerState::Closed);
-        (self.func)(ProducerState::Closed);
+        if self.state.get() == ProducerState::Started {
+            self.state.set(ProducerState::Closed);
+            (self.func)(ProducerState::Closed);
+        }
     }
 }
