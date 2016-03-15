@@ -22,10 +22,6 @@ impl Producer {
     pub fn new() -> Producer {
         Producer::from_func(Box::new(|_| {}))
     }
-    
-    pub fn set_func(&mut self, func: Box<Fn(ProducerState)>) {
-        self.func = func;
-    }
 
     pub fn is_closed(&self) -> bool {
         self.state.get() == ProducerState::Closed
@@ -33,5 +29,6 @@ impl Producer {
 
     pub fn close(&self) {
         self.state.set(ProducerState::Closed);
+        (self.func)(ProducerState::Closed);
     }
 }
