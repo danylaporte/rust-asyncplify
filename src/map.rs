@@ -31,7 +31,7 @@ impl<C, F, I, O> Consumer for MapState<C, F, I, O>
         self.consumer.emit((self.func)(item));
     }
 
-    fn end(self) {
+    fn end(&mut self) {
         self.consumer.end();
     }
 }

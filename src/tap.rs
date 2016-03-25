@@ -30,7 +30,7 @@ impl<C, F, T> Consumer for TapState<C, F, T>
         self.consumer.emit(item);
     }
 
-    fn end(self) {
+    fn end(&mut self) {
         self.consumer.end();
     }
 }

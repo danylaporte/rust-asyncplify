@@ -26,7 +26,7 @@ impl<C, F, T> Consumer for FilterState<C, F, T>
         }
     }
 
-    fn end(self) {
+    fn end(&mut self) {
         self.consumer.end();
     }
 }

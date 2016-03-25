@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::marker::PhantomData;
-use std::mem;
 use std::rc::Rc;
 use consumer::*;
 use producer::*;
@@ -14,7 +13,7 @@ struct FlatmapState<C, F, I, SO> {
 }
 
 struct Shared<C> {
-    consumer: Option<C>,
+    consumer: C,
     count: usize,
     producers: Vec<(usize, Option<Rc<Producer>>)>,
 }
@@ -29,7 +28,7 @@ impl<C> Shared<C> where C: Consumer
 
     fn new(consumer: C) -> Self {
         let mut s = Shared {
-            consumer: Some(consumer),
+            consumer: consumer,
             count: 0,
             producers: Vec::new(),
         };
@@ -54,9 +53,7 @@ impl<C> Shared<C> where C: Consumer
         }
 
         if is_closable {
-            if let Some(consumer) = mem::replace(&mut self.consumer, None) {
-                consumer.end();
-            }
+            self.consumer.end();
         }
     }
 }
@@ -75,12 +72,10 @@ impl<C> Consumer for Child<C> where C: Consumer
     }
 
     fn emit(&mut self, item: Self::Item) {
-        if let Some(ref mut consumer) = self.shared.borrow_mut().consumer {
-            consumer.emit(item);
-        }
+        self.shared.borrow_mut().consumer.emit(item);
     }
 
-    fn end(self) {
+    fn end(&mut self) {
         self.shared.borrow_mut().end(self.id);
     }
 }
@@ -99,21 +94,19 @@ impl<C, F, I, SO> Consumer for FlatmapState<C, F, I, SO>
 
         shared.init(1, producer);
 
-        if let Some(ref mut consumer) = shared.consumer {
-            let rc = Rc::new(Producer::from_func(Box::new(move |_| {
-                let ref mut producers = cloned_share.borrow_mut().producers;
+        let rc = Rc::new(Producer::from_func(Box::new(move |_| {
+            let ref mut producers = cloned_share.borrow_mut().producers;
 
-                for t in producers.iter() {
-                    if let Some(ref p) = t.1 {
-                        p.close();
-                    }
+            for t in producers.iter() {
+                if let Some(ref p) = t.1 {
+                    p.close();
                 }
+            }
 
-                producers.clear();
-            })));
+            producers.clear();
+        })));
 
-            consumer.init(rc);
-        }
+        shared.consumer.init(rc);
     }
 
     fn emit(&mut self, item: Self::Item) {
@@ -125,7 +118,7 @@ impl<C, F, I, SO> Consumer for FlatmapState<C, F, I, SO>
         });
     }
 
-    fn end(self) {
+    fn end(&mut self) {
         self.shared.borrow_mut().end(1);
     }
 }

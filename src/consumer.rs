@@ -6,5 +6,5 @@ pub trait Consumer {
 
     fn init(&mut self, Rc<Producer>);
     fn emit(&mut self, Self::Item);
-    fn end(self);
+    fn end(&mut self);
 }

@@ -30,7 +30,7 @@ impl<I> Consumer for Subscription<I> {
 
     fn emit(&mut self, _: Self::Item) {}
 
-    fn end(self) {}
+    fn end(&mut self) {}
 }
 
 pub trait  SubscribableStream : Stream {

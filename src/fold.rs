@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::mem::replace;
 use std::ops::Add;
 use std::rc::Rc;
 use consumer::*;
@@ -8,13 +9,13 @@ use stream::*;
 struct FoldState<C, F, I, O> {
     consumer: C,
     func: F,
-    value: O,
+    value: Option<O>,
     marker: PhantomData<I>,
 }
 
 impl<C, F, I, O> Consumer for FoldState<C, F, I, O>
     where C: Consumer<Item = O>,
-          F: Fn(&O, I) -> O
+          F: FnMut(O, I) -> O
 {
     type Item = I;
 
@@ -23,11 +24,13 @@ impl<C, F, I, O> Consumer for FoldState<C, F, I, O>
     }
 
     fn emit(&mut self, item: Self::Item) {
-        self.value = (self.func)(&self.value, item);
+        let v = replace(&mut self.value, None).unwrap();
+        self.value = Some((self.func)(v, item));
     }
 
-    fn end(mut self) {
-        self.consumer.emit(self.value);
+    fn end(&mut self) {
+        let v = replace(&mut self.value, None).unwrap();
+        self.consumer.emit(v);
         self.consumer.end();
     }
 }
@@ -40,7 +43,7 @@ pub struct Fold<S, F, O> {
 
 impl<S, F, O> Stream for Fold<S, F, O>
     where S: Stream,
-          F: Fn(&O, <S as Stream>::Item) -> O
+          F: FnMut(O, <S as Stream>::Item) -> O
 {
     type Item = O;
 
@@ -50,7 +53,7 @@ impl<S, F, O> Stream for Fold<S, F, O>
         self.stream.consume(FoldState {
             consumer: consumer,
             func: self.func,
-            value: self.initial,
+            value: Some(self.initial),
             marker: PhantomData::<S::Item>,
         });
     }
@@ -59,7 +62,7 @@ impl<S, F, O> Stream for Fold<S, F, O>
 pub trait FoldableStream: Stream {
     fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, F, O>
         where Self: Sized,
-              F: Fn(&O, Self::Item) -> O
+              F: FnMut(O, Self::Item) -> O
     {
         Fold {
             stream: self,
@@ -68,14 +71,14 @@ pub trait FoldableStream: Stream {
         }
     }
 
-    fn sum<O>(self) -> Fold<Self, fn(&O, Self::Item) -> O, O>
+    fn sum<O>(self) -> Fold<Self, fn(O, Self::Item) -> O, O>
         where Self: Sized,
               O: Add<Self::Item, Output = O> + Default + Copy
     {
-        fn adder<O, I>(v: &O, i: I) -> O
+        fn adder<O, I>(v: O, i: I) -> O
             where O: Add<I, Output = O> + Copy
         {
-            *v + i
+            v + i
         }
 
         self.fold(Default::default(), adder)
