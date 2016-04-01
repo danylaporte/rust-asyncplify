@@ -24,13 +24,10 @@ impl<T> Value<T> {
     }
 }
 
-impl<T> Stream for Value<T> where T: Clone
+impl<T> Stream<T> for Value<T>
+    where T: Clone
 {
-    type Item = T;
-
-    fn consume<C>(self, mut consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<T>>(self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());

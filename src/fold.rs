@@ -13,17 +13,15 @@ struct FoldState<C, F, I, O> {
     marker: PhantomData<I>,
 }
 
-impl<C, F, I, O> Consumer for FoldState<C, F, I, O>
-    where C: Consumer<Item = O>,
+impl<C, F, I, O> Consumer<I> for FoldState<C, F, I, O>
+    where C: Consumer<O>,
           F: FnMut(O, I) -> O
 {
-    type Item = I;
-
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: I) {
         let v = replace(&mut self.value, None).unwrap();
         self.value = Some((self.func)(v, item));
     }
@@ -35,45 +33,43 @@ impl<C, F, I, O> Consumer for FoldState<C, F, I, O>
     }
 }
 
-pub struct Fold<S, F, O> {
+pub struct Fold<S, I, F, O> {
     stream: S,
     func: F,
     initial: O,
+    marker: PhantomData<I>,
 }
 
-impl<S, F, O> Stream for Fold<S, F, O>
-    where S: Stream,
-          F: FnMut(O, <S as Stream>::Item) -> O
+impl<S, I, F, O> Stream<O> for Fold<S, I, F, O>
+    where S: Stream<I>,
+          F: FnMut(O, I) -> O
 {
-    type Item = O;
-
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<O>>(self, consumer: C) {
         self.stream.consume(FoldState {
             consumer: consumer,
             func: self.func,
             value: Some(self.initial),
-            marker: PhantomData::<S::Item>,
+            marker: PhantomData::<I>,
         });
     }
 }
 
-pub trait FoldableStream: Stream {
-    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, F, O>
+pub trait FoldableStream<I>: Stream<I> {
+    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, I, F, O>
         where Self: Sized,
-              F: FnMut(O, Self::Item) -> O
+              F: FnMut(O, I) -> O
     {
         Fold {
             stream: self,
             initial: initial,
             func: func,
+            marker: PhantomData::<I>,
         }
     }
 
-    fn sum<O>(self) -> Fold<Self, fn(O, Self::Item) -> O, O>
+    fn sum<O>(self) -> Fold<Self, I, fn(O, I) -> O, O>
         where Self: Sized,
-              O: Add<Self::Item, Output = O> + Default + Copy
+              O: Add<I, Output = O> + Default + Copy
     {
         fn adder<O, I>(v: O, i: I) -> O
             where O: Add<I, Output = O> + Copy
@@ -85,5 +81,4 @@ pub trait FoldableStream: Stream {
     }
 }
 
-impl<S> FoldableStream for S where S: Stream
-{}
+impl<T, S> FoldableStream<T> for S where S: Stream<T> {}

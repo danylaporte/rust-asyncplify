@@ -15,17 +15,15 @@ pub struct Tap<S, F> {
     func: F,
 }
 
-impl<C, F, T> Consumer for TapState<C, F, T>
-    where C: Consumer<Item = T>,
+impl<C, F, T> Consumer<T> for TapState<C, F, T>
+    where C: Consumer<T>,
           F: FnMut(&T)
 {
-    type Item = T;
-
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: T) {
         (self.func)(&item);
         self.consumer.emit(item);
     }
@@ -35,26 +33,22 @@ impl<C, F, T> Consumer for TapState<C, F, T>
     }
 }
 
-impl<S, F> Stream for Tap<S, F>
-    where S: Stream,
-          F: FnMut(&S::Item)
+impl<S, F, T> Stream<T> for Tap<S, F>
+    where S: Stream<T>,
+          F: FnMut(&T)
 {
-    type Item = S::Item;
-
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<T>>(self, consumer: C) {
         self.stream.consume(TapState {
             consumer: consumer,
             func: self.func,
-            marker: PhantomData::<Self::Item>,
+            marker: PhantomData::<T>,
         });
     }
 }
 
-pub trait  TappableStream : Stream {
+pub trait TappableStream<T> : Stream<T> {
     fn tap<F>(self, func: F) -> Tap<Self, F>
-        where F: FnMut(&Self::Item),
+        where F: FnMut(&T),
               Self: Sized
     {
         Tap {
@@ -64,5 +58,4 @@ pub trait  TappableStream : Stream {
     }
 }
 
-impl<S> TappableStream for S where S: Stream
-{}
+impl<S, T> TappableStream<T> for S where S: Stream<T> {}

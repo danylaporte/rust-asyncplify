@@ -7,13 +7,10 @@ pub struct IterStream<I> {
     iterator: I,
 }
 
-impl<I> Stream for IterStream<I> where I: Iterator + 'static
+impl<I, T> Stream<T> for IterStream<I>
+    where I: Iterator<Item = T> + 'static
 {
-    type Item = I::Item;
-
-    fn consume<C>(self, mut consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<T>>(self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
@@ -41,5 +38,4 @@ pub trait ToStream : Iterator {
     }
 }
 
-impl<I> ToStream for I where I: Iterator
-{}
+impl<I> ToStream for I where I: Iterator {}

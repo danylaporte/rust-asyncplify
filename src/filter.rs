@@ -10,17 +10,15 @@ struct FilterState<C, F, T> {
     marker: PhantomData<T>,
 }
 
-impl<C, F, T> Consumer for FilterState<C, F, T>
-    where C: Consumer<Item = T>,
-          F: Fn(&T) -> bool
+impl<C, F, T> Consumer<T> for FilterState<C, F, T>
+    where C: Consumer<T>,
+          F: FnMut(&T) -> bool
 {
-    type Item = T;
-
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: T) {
         if (self.func)(&item) {
             self.consumer.emit(item);
         }
@@ -31,39 +29,36 @@ impl<C, F, T> Consumer for FilterState<C, F, T>
     }
 }
 
-pub struct Filter<S, F> {
+pub struct Filter<S, F, T> {
     stream: S,
     func: F,
+    marker: PhantomData<T>,
 }
 
-impl<S, F> Stream for Filter<S, F>
-    where S: Stream,
-          F: Fn(&<S as Stream>::Item) -> bool
+impl<S, F, T> Stream<T> for Filter<S, F, T>
+    where S: Stream<T>,
+          F: FnMut(&T) -> bool
 {
-    type Item = S::Item;
-
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<T>>(self, consumer: C) {
         self.stream.consume(FilterState {
             consumer: consumer,
             func: self.func,
-            marker: PhantomData::<S::Item>,
+            marker: PhantomData::<T>,
         });
     }
 }
 
-pub trait FilterableStream : Stream {
-    fn filter<F>(self, func: F) -> Filter<Self, F>
+pub trait FilterableStream<T> : Stream<T> {
+    fn filter<F>(self, func: F) -> Filter<Self, F, T>
         where Self: Sized,
-              F: Fn(&Self::Item) -> bool
+              F: FnMut(&T) -> bool
     {
         Filter {
             stream: self,
             func: func,
+            marker: PhantomData::<T>,
         }
     }
 }
 
-impl<S> FilterableStream for S where S: Stream
-{}
+impl<S, T> FilterableStream<T> for S where S: Stream<T> {}

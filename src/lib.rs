@@ -9,7 +9,6 @@ mod producer;
 mod stream;
 mod subscription;
 mod tap;
-mod unit;
 mod value;
 
 pub use consumer::*;
@@ -23,7 +22,6 @@ pub use producer::*;
 pub use stream::*;
 pub use subscription::*;
 pub use tap::*;
-pub use unit::*;
 pub use value::*;
 
 #[cfg(test)]

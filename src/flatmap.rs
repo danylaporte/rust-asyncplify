@@ -5,21 +5,22 @@ use consumer::*;
 use producer::*;
 use stream::*;
 
-struct FlatmapState<C, F, I, SO> {
+struct FlatmapState<C, F, I, SO, O> {
     func: F,
     marker_i: PhantomData<I>,
+    marker_o: PhantomData<O>,
     marker_so: PhantomData<SO>,
-    shared: Rc<RefCell<Shared<C>>>,
+    shared: Rc<RefCell<Shared<C, O>>>,
 }
 
-struct Shared<C> {
+struct Shared<C, T> {
     consumer: C,
     count: usize,
+    marker_t: PhantomData<T>,
     producers: Vec<(usize, Option<Rc<Producer>>)>,
 }
 
-impl<C> Shared<C> where C: Consumer
-{
+impl<C: Consumer<T>, T> Shared<C, T> {
     fn add_producer(&mut self) -> usize {
         self.count += 1;
         self.producers.push((self.count, None));
@@ -31,6 +32,7 @@ impl<C> Shared<C> where C: Consumer
             consumer: consumer,
             count: 0,
             producers: Vec::new(),
+            marker_t: PhantomData::<T>,
         };
 
         s.add_producer();
@@ -58,20 +60,17 @@ impl<C> Shared<C> where C: Consumer
     }
 }
 
-struct Child<C> {
+struct Child<C, T> {
     id: usize,
-    shared: Rc<RefCell<Shared<C>>>,
+    shared: Rc<RefCell<Shared<C, T>>>,
 }
 
-impl<C> Consumer for Child<C> where C: Consumer
-{
-    type Item = C::Item;
-
+impl<C: Consumer<T>, T> Consumer<T> for Child<C, T> {
     fn init(&mut self, producer: Rc<Producer>) {
         self.shared.borrow_mut().init(self.id, producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: T) {
         self.shared.borrow_mut().consumer.emit(item);
     }
 
@@ -80,13 +79,12 @@ impl<C> Consumer for Child<C> where C: Consumer
     }
 }
 
-impl<C, F, I, SO> Consumer for FlatmapState<C, F, I, SO>
-    where C: Consumer + 'static,
+impl<C, F, I, SO, O> Consumer<I> for FlatmapState<C, F, I, SO, O>
+    where C: Consumer<O> + 'static,
           F: FnMut(I) -> SO,
-          SO: Stream<Item = C::Item>
+          SO: Stream<O>,
+          O: 'static,
 {
-    type Item = I;
-
     fn init(&mut self, producer: Rc<Producer>) {
 
         let cloned_share = self.shared.clone();
@@ -109,7 +107,7 @@ impl<C, F, I, SO> Consumer for FlatmapState<C, F, I, SO>
         shared.consumer.init(rc);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: I) {
         let id = self.shared.borrow_mut().add_producer();
 
         (self.func)(item).consume(Child {
@@ -123,47 +121,50 @@ impl<C, F, I, SO> Consumer for FlatmapState<C, F, I, SO>
     }
 }
 
-pub struct Flatmap<S, F, SO> {
+pub struct Flatmap<S, F, I, SO, O> {
     stream: S,
     func: F,
+    marker_i: PhantomData<I>,
+    marker_o: PhantomData<O>,
     marker_so: PhantomData<SO>,
 }
 
-impl<S, F, SO> Stream for Flatmap<S, F, SO>
-    where S: Stream,
-          F: FnMut(<S as Stream>::Item) -> SO,
-          SO: Stream
+impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
+    where S: Stream<I>,
+          F: FnMut(I) -> SO,
+          SO: Stream<O>,
+          O: 'static
 {
-    type Item = SO::Item;
-
     fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item> + 'static
+        where C: Consumer<O> + 'static
     {
         self.stream.consume(FlatmapState {
             func: self.func,
-            marker_i: PhantomData::<S::Item>,
+            marker_i: PhantomData::<I>,
+            marker_o: PhantomData::<O>,
             marker_so: self.marker_so,
             shared: Rc::new(RefCell::new(Shared::new(consumer))),
         });
     }
 }
 
-pub trait FlatmapStream: Stream {
-    fn flatmap<F, SO>(self, func: F) -> Flatmap<Self, F, SO>
+pub trait FlatmapStream<I>: Stream<I> {
+    fn flatmap<F, SO, O>(self, func: F) -> Flatmap<Self, F, I, SO, O>
         where Self: Sized,
-              F: FnMut(Self::Item) -> SO,
-              SO: Stream
+              F: FnMut(I) -> SO,
+              SO: Stream<O>
     {
         Flatmap {
             stream: self,
             func: func,
+            marker_i: PhantomData::<I>,
             marker_so: PhantomData::<SO>,
+            marker_o: PhantomData::<O>,
         }
     }
 }
 
-impl<S> FlatmapStream for S where S: Stream
-{}
+impl<S, T> FlatmapStream<T> for S where S: Stream<T> {}
 
 #[cfg(test)]
 mod tests {

@@ -11,23 +11,22 @@ struct MapState<C, F, I, O> {
     marker_o: PhantomData<O>,
 }
 
-pub struct Map<S, F, O> {
+pub struct Map<S, F, I, O> {
     stream: S,
     func: F,
-    marker: PhantomData<O>,
+    marker_i: PhantomData<I>,
+    marker_o: PhantomData<O>,
 }
 
-impl<C, F, I, O> Consumer for MapState<C, F, I, O>
-    where C: Consumer<Item = O>,
-          F: Fn(I) -> C::Item
+impl<C, F, I, O> Consumer<I> for MapState<C, F, I, O>
+    where C: Consumer<O>,
+          F: FnMut(I) -> O
 {
-    type Item = I;
-
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
+    fn emit(&mut self, item: I) {
         self.consumer.emit((self.func)(item));
     }
 
@@ -36,36 +35,32 @@ impl<C, F, I, O> Consumer for MapState<C, F, I, O>
     }
 }
 
-impl<S, F, O> Stream for Map<S, F, O>
-    where S: Stream,
-          F: Fn(S::Item) -> O
+impl<S, F, I, O> Stream<O> for Map<S, F, I, O>
+    where S: Stream<I>,
+          F: FnMut(I) -> O
 {
-    type Item = O;
-
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
+    fn consume<C: Consumer<O>>(self, consumer: C) {
         self.stream.consume(MapState {
             consumer: consumer,
             func: self.func,
-            marker_i: PhantomData::<S::Item>,
-            marker_o: PhantomData::<Self::Item>,
+            marker_i: PhantomData::<I>,
+            marker_o: PhantomData::<O>,
         });
     }
 }
 
-pub trait  MappableStream : Stream {
-    fn map<O, F>(self, func: F) -> Map<Self, F, O>
+pub trait MappableStream<I> : Stream<I> {
+    fn map<O, F>(self, func: F) -> Map<Self, F, I, O>
         where Self: Sized,
-              F: Fn(Self::Item) -> O
+              F: FnMut(I) -> O
     {
         Map {
             stream: self,
             func: func,
-            marker: PhantomData::<O>,
+            marker_i: PhantomData::<I>,
+            marker_o: PhantomData::<O>,
         }
     }
 }
 
-impl<S> MappableStream for S where S: Stream
-{}
+impl<S, T> MappableStream<T> for S where S: Stream<T> {}
