@@ -10,7 +10,7 @@ pub struct IterStream<I> {
 impl<I, T> Stream<T> for IterStream<I>
     where I: Iterator<Item = T> + 'static
 {
-    fn consume<C: Consumer<T>>(self, mut consumer: C) {
+    fn consume(self, consumer: &mut Consumer<T>) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());

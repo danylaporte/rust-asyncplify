@@ -1,14 +1,14 @@
 use std::marker::PhantomData;
+
 use std::rc::Rc;
 use consumer::*;
 use producer::*;
 use stream::*;
 
-struct MapState<C, F, I, O> {
-    consumer: C,
+struct MapState<'a, F, I, O: 'a> {
+    consumer: &'a mut Consumer<O>,
     func: F,
     marker_i: PhantomData<I>,
-    marker_o: PhantomData<O>,
 }
 
 pub struct Map<S, F, I, O> {
@@ -18,10 +18,7 @@ pub struct Map<S, F, I, O> {
     marker_o: PhantomData<O>,
 }
 
-impl<C, F, I, O> Consumer<I> for MapState<C, F, I, O>
-    where C: Consumer<O>,
-          F: FnMut(I) -> O
-{
+impl<'a, F: FnMut(I) -> O, I, O> Consumer<I> for MapState<'a, F, I, O> {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
@@ -35,16 +32,12 @@ impl<C, F, I, O> Consumer<I> for MapState<C, F, I, O>
     }
 }
 
-impl<S, F, I, O> Stream<O> for Map<S, F, I, O>
-    where S: Stream<I>,
-          F: FnMut(I) -> O
-{
-    fn consume<C: Consumer<O>>(self, consumer: C) {
-        self.stream.consume(MapState {
+impl<S: Stream<I>, F: FnMut(I) -> O, I, O> Stream<O> for Map<S, F, I, O> {
+    fn consume(self, consumer: &mut Consumer<O>) {
+        self.stream.consume(&mut MapState {
             consumer: consumer,
             func: self.func,
             marker_i: PhantomData::<I>,
-            marker_o: PhantomData::<O>,
         });
     }
 }

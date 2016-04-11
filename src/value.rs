@@ -45,7 +45,7 @@ impl<'a, T> ValueRefMut<'a, T> {
 }
 
 impl<T> Stream<T> for Value<T> {
-    fn consume<C: Consumer<T>>(self, mut consumer: C) {
+    fn consume<'b>(self, consumer: &'b mut Consumer<T>) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
@@ -61,7 +61,7 @@ impl<T> Stream<T> for Value<T> {
 }
 
 impl<'a, T> StreamRef<T> for ValueRef<'a, T> {
-    fn consume<C: ConsumerRef<T>>(self, mut consumer: C) {
+    fn consume<'b>(self, consumer: &'b mut ConsumerRef<T>) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
@@ -77,7 +77,7 @@ impl<'a, T> StreamRef<T> for ValueRef<'a, T> {
 }
 
 impl<'a, T> StreamRefMut<T> for ValueRefMut<'a, T> {
-    fn consume<C: ConsumerRefMut<T>>(self, mut consumer: C) {
+    fn consume<'b>(self, consumer: &'b mut ConsumerRefMut<T>) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());

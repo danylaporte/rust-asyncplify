@@ -6,17 +6,14 @@ use consumer::*;
 use producer::*;
 use stream::*;
 
-struct FoldState<C, F, I, O> {
-    consumer: C,
+struct FoldState<'a, F, I, O: 'a> {
+    consumer: &'a mut Consumer<O>,
     func: F,
     value: Option<O>,
     marker: PhantomData<I>,
 }
 
-impl<C, F, I, O> Consumer<I> for FoldState<C, F, I, O>
-    where C: Consumer<O>,
-          F: FnMut(O, I) -> O
-{
+impl<'a, F: FnMut(O, I) -> O, I, O> Consumer<I> for FoldState<'a, F, I, O> {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
@@ -44,8 +41,8 @@ impl<S, I, F, O> Stream<O> for Fold<S, I, F, O>
     where S: Stream<I>,
           F: FnMut(O, I) -> O
 {
-    fn consume<C: Consumer<O>>(self, consumer: C) {
-        self.stream.consume(FoldState {
+    fn consume(self, consumer: &mut Consumer<O>) {
+        self.stream.consume(&mut FoldState {
             consumer: consumer,
             func: self.func,
             value: Some(self.initial),

@@ -5,29 +5,28 @@ use consumer::*;
 use producer::*;
 use stream::*;
 
-struct FlatmapState<C, F, I, SO, O> {
+struct FlatmapState<'a, F, I, SO, O> {
     func: F,
     marker_i: PhantomData<I>,
     marker_o: PhantomData<O>,
     marker_so: PhantomData<SO>,
-    shared: Rc<RefCell<Shared<C, O>>>,
+    shared: Rc<RefCell<Shared<'a, O>>>,
 }
 
-struct Shared<C, T> {
-    consumer: C,
+struct Shared<'a, T> {
+    consumer: &'a mut Consumer<T>,
     count: usize,
-    marker_t: PhantomData<T>,
     producers: Vec<(usize, Option<Rc<Producer>>)>,
 }
 
-impl<C: Consumer<T>, T> Shared<C, T> {
+impl<'a, T> Shared<'a, T> {
     fn add_producer(&mut self) -> usize {
         self.count += 1;
         self.producers.push((self.count, None));
         self.count
     }
 
-    fn new(consumer: C) -> Self {
+    fn new(consumer: &'a mut Consumer<T>) -> Self {
         let mut s = Shared {
             consumer: consumer,
             count: 0,
@@ -83,7 +82,7 @@ impl<C, F, I, SO, O> Consumer<I> for FlatmapState<C, F, I, SO, O>
     where C: Consumer<O> + 'static,
           F: FnMut(I) -> SO,
           SO: Stream<O>,
-          O: 'static,
+          O: 'static
 {
     fn init(&mut self, producer: Rc<Producer>) {
 
@@ -135,10 +134,8 @@ impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
           SO: Stream<O>,
           O: 'static
 {
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<O> + 'static
-    {
-        self.stream.consume(FlatmapState {
+    fn consume(self, consumer: &mut Consumer<O>) {
+        self.stream.consume(&mut FlatmapState {
             func: self.func,
             marker_i: PhantomData::<I>,
             marker_o: PhantomData::<O>,

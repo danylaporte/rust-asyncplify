@@ -49,7 +49,7 @@ pub trait SubscribableStream<T> : Stream<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(Subscription {
+        self.consume(&mut Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });
@@ -60,7 +60,7 @@ pub trait SubscribableStreamRef<T> : StreamRef<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(Subscription {
+        self.consume(&mut Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });
@@ -71,7 +71,7 @@ pub trait SubscribableStreamRefMut<T> : StreamRefMut<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(Subscription {
+        self.consume(&mut Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });

@@ -1,6 +1,6 @@
 mod consumer;
 mod empty;
-mod flatmap;
+//mod flatmap;
 mod filter;
 mod fold;
 mod iter;
@@ -9,11 +9,12 @@ mod producer;
 mod stream;
 mod subscription;
 mod tap;
+mod to_vec;
 mod value;
 
 pub use consumer::*;
 pub use empty::*;
-pub use flatmap::*;
+//pub use flatmap::*;
 pub use filter::*;
 pub use fold::*;
 pub use iter::*;
@@ -22,6 +23,7 @@ pub use producer::*;
 pub use stream::*;
 pub use subscription::*;
 pub use tap::*;
+pub use to_vec::*;
 pub use value::*;
 
 #[cfg(test)]

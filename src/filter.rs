@@ -1,18 +1,16 @@
-use std::marker::PhantomData;
-use std::rc::Rc;
 use consumer::*;
 use producer::*;
+use std::marker::PhantomData;
+use std::rc::Rc;
 use stream::*;
 
-struct FilterState<C, F, T> {
-    consumer: C,
+struct FilterState<'a, F, T: 'a> {
+    consumer: &'a mut Consumer<T>,
     func: F,
-    marker: PhantomData<T>,
 }
 
-impl<C, F, T> Consumer<T> for FilterState<C, F, T>
-    where C: Consumer<T>,
-          F: FnMut(&T) -> bool
+impl<'a, F, T> Consumer<T> for FilterState<'a, F, T>
+    where F: FnMut(&T) -> bool
 {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
@@ -29,6 +27,7 @@ impl<C, F, T> Consumer<T> for FilterState<C, F, T>
     }
 }
 
+/// Describe a filter for a `stream`.
 pub struct Filter<S, F, T> {
     stream: S,
     func: F,
@@ -39,16 +38,28 @@ impl<S, F, T> Stream<T> for Filter<S, F, T>
     where S: Stream<T>,
           F: FnMut(&T) -> bool
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(FilterState {
+    fn consume(self, consumer: &mut Consumer<T>) {
+        self.stream.consume(&mut FilterState {
             consumer: consumer,
             func: self.func,
-            marker: PhantomData::<T>,
         });
     }
 }
 
+/// Represent a filtrable `stream`.
 pub trait FilterableStream<T> : Stream<T> {
+    /// Filter a `Stream` based on a func `Stream`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;    
+    ///
+    /// (0..10)
+    ///     .to_stream()
+    ///     .filter(|v| v % 2 == 0)
+    ///     .subscribe();
+    /// ``` 
     fn filter<F>(self, func: F) -> Filter<Self, F, T>
         where Self: Sized,
               F: FnMut(&T) -> bool
@@ -62,3 +73,25 @@ pub trait FilterableStream<T> : Stream<T> {
 }
 
 impl<S, T> FilterableStream<T> for S where S: Stream<T> {}
+
+#[cfg(test)]
+mod tests {
+    use fold::*;
+    use iter::*;
+    use subscription::*;
+    use super::*;
+    use tap::*;
+
+    #[test]
+    fn it_works() {
+        let mut f = 0;
+        (0..10)
+            .to_stream()
+            .filter(|v| *v < 4)
+            .sum()
+            .tap(|v| f = *v)
+            .subscribe();
+
+        assert!(f == 6, "f = {}", f);
+    }
+}

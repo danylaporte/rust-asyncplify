@@ -1,13 +1,11 @@
-use std::marker::PhantomData;
 use std::rc::Rc;
 use consumer::*;
 use producer::*;
 use stream::*;
 
-struct TapState<C, F, T> {
-    consumer: C,
+struct TapState<'a, F, T: 'a> {
+    consumer: &'a mut Consumer<T>,
     func: F,
-    marker: PhantomData<T>,
 }
 
 pub struct Tap<S, F> {
@@ -15,10 +13,7 @@ pub struct Tap<S, F> {
     func: F,
 }
 
-impl<C, F, T> Consumer<T> for TapState<C, F, T>
-    where C: Consumer<T>,
-          F: FnMut(&T)
-{
+impl<'a, F: FnMut(&T), T> Consumer<T> for TapState<'a, F, T> {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
@@ -37,11 +32,10 @@ impl<S, F, T> Stream<T> for Tap<S, F>
     where S: Stream<T>,
           F: FnMut(&T)
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(TapState {
+    fn consume(self, consumer: &mut Consumer<T>) {
+        self.stream.consume(&mut TapState {
             consumer: consumer,
             func: self.func,
-            marker: PhantomData::<T>,
         });
     }
 }

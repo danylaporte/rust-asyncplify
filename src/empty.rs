@@ -16,7 +16,7 @@ use stream::*;
 pub struct Empty;
 
 impl Stream<()> for Empty {
-    fn consume<C: Consumer<()>>(self, mut consumer: C) {
+    fn consume(self, consumer: &mut Consumer<()>) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
