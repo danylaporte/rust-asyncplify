@@ -1,20 +1,20 @@
-use std::collections::hash_map::*;
+use consumer::*;
+use producer::*;
 use std::cell::*;
+use std::collections::hash_map::*;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Add, Deref};
 use std::rc::Rc;
-use consumer::*;
-use producer::*;
 use stream::*;
 
-struct Group<K, T> {
-    consumer: Option<Box<Consumer<Item = T>>>,
+struct Group<'a, K, T: 'a> {
+    consumer: Option<&'a mut Consumer<T>>,
     key: K,
 }
 
-impl<K, V> Group<K, V> {
+impl<'a, K, V> Group<'a, K, V> {
     fn emit(&mut self, item: V) {
         if let Some(ref mut c) = self.consumer {
             c.emit(item);
@@ -35,91 +35,77 @@ impl<K, V> Group<K, V> {
     }
 }
 
-struct GroupByState<C, F, K, T> {
-    consumer: C,
-    func: F,
-    hashmap: HashMap<K, Rc<Group<K, T>>>,
+struct GroupByState<'a, F, K: 'a, T: 'a> {
+    consumer: &'a mut ConsumerRefMut<Group<'a, K, T>>,
+    hashmap: HashMap<K, Group<'a, K, T>>,
+    key_selector: F,
 }
 
-impl<C, F, K, T> Consumer for GroupByState<C, F, K, T>
-    where C: Consumer<Item = Rc<Group<K, T>>>,
-          F: FnMut(&T) -> K,
-          K: Eq + Hash + Clone
-{
-    type Item = T;
-
+impl<'a, F: FnMut(&T) -> K, K: Eq + Hash + Copy, T> Consumer<T> for GroupByState<'a, F, K, T> {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: Self::Item) {
-        let key = (self.func)(&item);
-        
-        if let Some(g) = self.hashmap.get(&key) {
-            g.borrow_mut().emit(item);
-            return;
-        }
+    fn emit(&mut self, item: T) {
+        let key = (self.key_selector)(&item);
+        let consumer = &mut self.consumer;
 
-        self.hashmap.insert(key.clone(), Rc::new(RefCell::new(Group::new(key.clone())));
-        let g = self.hashmap.get(&key).unwrap();
-        self.consumer.emit(g.borrow());
-        g.borrow_mut().emit(item);
+        let entry = self.hashmap.entry(key).or_insert_with(|| {
+            let mut group = Group {
+                consumer: None,
+                key: key,
+            };
+
+            consumer.emit(&mut group);
+            group
+        });
+
+        entry.emit(item);
     }
 
     fn end(&mut self) {
         for kv in self.hashmap.drain() {
-            kv.1.borrow_mut().end();
+            kv.1.end();
         }
 
         self.consumer.end();
     }
 }
 
-pub struct GroupBy<S, F, K> {
+pub struct GroupBy<S, F, K, V> {
+    key_selector: F,
+    marker_K: PhantomData<K>,
+    marker_V: PhantomData<V>,
     stream: S,
-    func: F,
-    marker_k: PhantomData<K>,
 }
 
-impl<S, F, K> Stream for GroupBy<S, F, K>
-    where S: Stream,
-          F: FnMut(&<S as Stream>::Item) -> K,
-          K: Eq + Hash + Clone
-{
-    type Item = Group<K, S::Item>;
-
-    fn consume<C>(self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
-        self.stream.consume(GroupByState {
+impl<'a, S: Stream<V>, F: FnMut(&V) -> K, K: Eq + Hash + Copy, V> StreamRefMut<Group<'a, K, V>> for GroupBy<S,F,K,V> {
+    fn consume(self, consumer: &mut ConsumerRefMut<Group<'a, K, V>>) {
+        self.stream.consume(&mut GroupByState {
             consumer: consumer,
-            func: self.func,
             hashmap: HashMap::new(),
+            key_selector: self.key_selector,
         });
     }
 }
 
-impl<K, V> Stream for Group<K, V> {
-    type Item = V;
-
-    fn consume<C>(mut self, consumer: C)
-        where C: Consumer<Item = Self::Item>
-    {
-        self.consumer = Some(Box::new(consumer));
+impl<'a, K, V> Stream<V> for Group<'a, K, V> {
+    fn consume(mut self, consumer: &mut Consumer<V>) {
+        self.consumer = Some(consumer);
     }
 }
 
-pub trait GroupByStream: Stream {
-    fn group_by<F, K>(self, func: F) -> GroupBy<Self, F, K>
-        where Self: Sized,
-              F: FnMut(&Self::Item) -> K
+pub trait GroupByStream<T>: StreamRefMut<T> {
+    fn group_by<F: FnMut(&V) -> K, K, V>(self, key_selector: F) -> GroupBy<Self, F, K, V>
+        where Self: Sized
     {
         GroupBy {
+            key_selector: key_selector,
+            marker_K: PhantomData::<K>,
+            marker_V: PhantomData::<V>,
             stream: self,
-            func: func,
-            marker_k: PhantomData::<K>,
         }
     }
 }
 
-impl<S> GroupByStream for S where S: Stream {}
+impl<S, T> GroupByStream<T> for S where S: StreamRefMut<T> {}
