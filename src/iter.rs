@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use consumer::*;
 use producer::*;
+use std::rc::Rc;
 use stream::*;
 
 pub struct IterStream<I> {
@@ -10,7 +10,7 @@ pub struct IterStream<I> {
 impl<I, T> Stream<T> for IterStream<I>
     where I: Iterator<Item = T> + 'static
 {
-    fn consume(self, consumer: &mut Consumer<T>) {
+    fn consume<C: Consumer<T>>(self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
@@ -30,7 +30,7 @@ impl<I, T> Stream<T> for IterStream<I>
     }
 }
 
-pub trait ToStream : Iterator {
+pub trait ToStream: Iterator {
     fn to_stream(self) -> IterStream<Self>
         where Self: Sized
     {

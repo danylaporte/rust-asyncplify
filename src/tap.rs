@@ -1,11 +1,13 @@
-use std::rc::Rc;
 use consumer::*;
 use producer::*;
+use std::marker::PhantomData;
+use std::rc::Rc;
 use stream::*;
 
-struct TapState<'a, F, T: 'a> {
-    consumer: &'a mut Consumer<T>,
+struct TapState<C, F, T> {
+    consumer: C,
     func: F,
+    marker_t: PhantomData<T>,
 }
 
 pub struct Tap<S, F> {
@@ -13,7 +15,10 @@ pub struct Tap<S, F> {
     func: F,
 }
 
-impl<'a, F: FnMut(&T), T> Consumer<T> for TapState<'a, F, T> {
+impl<C, F: FnMut(&T), T> Consumer<T> for TapState<C, F, T>
+    where C: Consumer<T>,
+          F: FnMut(&T)
+{
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
@@ -23,7 +28,7 @@ impl<'a, F: FnMut(&T), T> Consumer<T> for TapState<'a, F, T> {
         self.consumer.emit(item);
     }
 
-    fn end(&mut self) {
+    fn end(self) {
         self.consumer.end();
     }
 }
@@ -32,15 +37,16 @@ impl<S, F, T> Stream<T> for Tap<S, F>
     where S: Stream<T>,
           F: FnMut(&T)
 {
-    fn consume(self, consumer: &mut Consumer<T>) {
-        self.stream.consume(&mut TapState {
+    fn consume<C: Consumer<T>>(self, consumer: C) {
+        self.stream.consume(TapState {
             consumer: consumer,
             func: self.func,
+            marker_t: PhantomData::<T>,
         });
     }
 }
 
-pub trait TappableStream<T> : Stream<T> {
+pub trait TappableStream<T>: Stream<T> {
     fn tap<F>(self, func: F) -> Tap<Self, F>
         where F: FnMut(&T),
               Self: Sized

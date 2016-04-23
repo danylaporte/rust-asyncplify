@@ -1,7 +1,7 @@
 mod consumer;
 mod empty;
-//mod flatmap;
 mod filter;
+// mod flatmap;
 mod fold;
 mod group_by;
 mod iter;
@@ -15,8 +15,8 @@ mod value;
 
 pub use consumer::*;
 pub use empty::*;
-//pub use flatmap::*;
 pub use filter::*;
+// pub use flatmap::*;
 pub use fold::*;
 pub use group_by::*;
 pub use iter::*;

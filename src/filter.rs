@@ -4,13 +4,15 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 use stream::*;
 
-struct FilterState<'a, F, T: 'a> {
-    consumer: &'a mut Consumer<T>,
+struct FilterState<C, F, T> {
+    consumer: C,
     func: F,
+    marker_t: PhantomData<T>,
 }
 
-impl<'a, F, T> Consumer<T> for FilterState<'a, F, T>
-    where F: FnMut(&T) -> bool
+impl<C, F, T> Consumer<T> for FilterState<C, F, T>
+    where C: Consumer<T>,
+          F: FnMut(&T) -> bool
 {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
@@ -22,7 +24,7 @@ impl<'a, F, T> Consumer<T> for FilterState<'a, F, T>
         }
     }
 
-    fn end(&mut self) {
+    fn end(self) {
         self.consumer.end();
     }
 }
@@ -38,16 +40,17 @@ impl<S, F, T> Stream<T> for Filter<S, F, T>
     where S: Stream<T>,
           F: FnMut(&T) -> bool
 {
-    fn consume(self, consumer: &mut Consumer<T>) {
-        self.stream.consume(&mut FilterState {
+    fn consume<C: Consumer<T>>(self, consumer: C) {
+        self.stream.consume(FilterState {
             consumer: consumer,
             func: self.func,
+            marker_t: PhantomData::<T>,
         });
     }
 }
 
 /// Represent a filtrable `stream`.
-pub trait FilterableStream<T> : Stream<T> {
+pub trait FilterableStream<T>: Stream<T> {
     /// Filter a `Stream` based on a func `Stream`.
     ///
     /// # Examples

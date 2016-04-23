@@ -1,18 +1,18 @@
-use std::rc::Rc;
 use consumer::*;
 use producer::*;
+use std::rc::Rc;
 use stream::*;
 
 pub struct Value<T> {
     value: T,
 }
 
-pub struct ValueRef<'a, T: 'a> {
-    value: &'a T,
+pub struct ValueRef<T> {
+    value: T,
 }
 
-pub struct ValueRefMut<'a, T: 'a> {
-    value: &'a mut T,
+pub struct ValueRefMut<T> {
+    value: T,
 }
 
 impl<T> Value<T> {
@@ -32,20 +32,20 @@ impl<T> Value<T> {
     }
 }
 
-impl<'a, T> ValueRef<'a, T> {
-    pub fn new(value: &'a T) -> Self {
+impl<T> ValueRef<T> {
+    pub fn new(value: T) -> Self {
         ValueRef { value: value }
     }
 }
 
-impl<'a, T> ValueRefMut<'a, T> {
-    pub fn new(value: &'a mut T) -> Self {
+impl<T> ValueRefMut<T> {
+    pub fn new(value: T) -> Self {
         ValueRefMut { value: value }
     }
 }
 
 impl<T> Stream<T> for Value<T> {
-    fn consume<'b>(self, consumer: &'b mut Consumer<T>) {
+    fn consume<C: Consumer<T>>(self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
@@ -60,14 +60,14 @@ impl<T> Stream<T> for Value<T> {
     }
 }
 
-impl<'a, T> StreamRef<T> for ValueRef<'a, T> {
-    fn consume<'b>(self, consumer: &'b mut ConsumerRef<T>) {
+impl<T> StreamRef<T> for ValueRef<T> {
+    fn consume<C: ConsumerRef<T>>(self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
 
         if !producer.is_closed() {
-            consumer.emit(self.value);
+            consumer.emit(&self.value);
         }
 
         if !producer.is_closed() {
@@ -76,14 +76,14 @@ impl<'a, T> StreamRef<T> for ValueRef<'a, T> {
     }
 }
 
-impl<'a, T> StreamRefMut<T> for ValueRefMut<'a, T> {
-    fn consume<'b>(self, consumer: &'b mut ConsumerRefMut<T>) {
+impl<T> StreamRefMut<T> for ValueRefMut<T> {
+    fn consume<C: ConsumerRefMut<T>>(mut self, mut consumer: C) {
         let producer = Rc::new(Producer::new());
 
         consumer.init(producer.clone());
 
         if !producer.is_closed() {
-            consumer.emit(self.value);
+            consumer.emit(&mut self.value);
         }
 
         if !producer.is_closed() {

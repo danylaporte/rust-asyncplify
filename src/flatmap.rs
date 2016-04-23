@@ -1,8 +1,8 @@
+use consumer::*;
+use producer::*;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use consumer::*;
-use producer::*;
 use stream::*;
 
 struct FlatmapState<'a, F, I, SO, O> {

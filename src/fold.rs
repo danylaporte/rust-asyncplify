@@ -1,19 +1,22 @@
+use consumer::*;
+use producer::*;
 use std::marker::PhantomData;
 use std::mem::replace;
 use std::ops::Add;
 use std::rc::Rc;
-use consumer::*;
-use producer::*;
 use stream::*;
 
-struct FoldState<'a, F, I, O: 'a> {
-    consumer: &'a mut Consumer<O>,
+struct FoldState<C, F, I, O> {
+    consumer: C,
     func: F,
     value: Option<O>,
-    marker: PhantomData<I>,
+    marker_i: PhantomData<I>,
 }
 
-impl<'a, F: FnMut(O, I) -> O, I, O> Consumer<I> for FoldState<'a, F, I, O> {
+impl<C, F, I, O> Consumer<I> for FoldState<C, F, I, O>
+    where C: Consumer<O>,
+          F: FnMut(O, I) -> O
+{
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
@@ -23,7 +26,7 @@ impl<'a, F: FnMut(O, I) -> O, I, O> Consumer<I> for FoldState<'a, F, I, O> {
         self.value = Some((self.func)(v, item));
     }
 
-    fn end(&mut self) {
+    fn end(mut self) {
         let v = replace(&mut self.value, None).unwrap();
         self.consumer.emit(v);
         self.consumer.end();
@@ -34,19 +37,19 @@ pub struct Fold<S, I, F, O> {
     stream: S,
     func: F,
     initial: O,
-    marker: PhantomData<I>,
+    marker_i: PhantomData<I>,
 }
 
 impl<S, I, F, O> Stream<O> for Fold<S, I, F, O>
     where S: Stream<I>,
           F: FnMut(O, I) -> O
 {
-    fn consume(self, consumer: &mut Consumer<O>) {
-        self.stream.consume(&mut FoldState {
+    fn consume<C: Consumer<O>>(self, consumer: C) {
+        self.stream.consume(FoldState {
             consumer: consumer,
             func: self.func,
             value: Some(self.initial),
-            marker: PhantomData::<I>,
+            marker_i: PhantomData::<I>,
         });
     }
 }
@@ -60,7 +63,7 @@ pub trait FoldableStream<I>: Stream<I> {
             stream: self,
             initial: initial,
             func: func,
-            marker: PhantomData::<I>,
+            marker_i: PhantomData::<I>,
         }
     }
 

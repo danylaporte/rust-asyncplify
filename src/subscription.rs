@@ -1,9 +1,9 @@
+use consumer::*;
+use producer::*;
 use std::marker::PhantomData;
 use std::mem;
 use std::option::*;
 use std::rc::Rc;
-use consumer::*;
-use producer::*;
 use stream::*;
 
 /// Represents a subscription to a `Stream`
@@ -26,7 +26,7 @@ impl<T> Consumer<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit(&mut self, _: T) {}
-    fn end(&mut self) {}
+    fn end(self) {}
 }
 
 impl<T> ConsumerRef<T> for Subscription<T> {
@@ -34,7 +34,7 @@ impl<T> ConsumerRef<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit<'a>(&mut self, _: &'a T) {}
-    fn end(&mut self) {}
+    fn end(self) {}
 }
 
 impl<T> ConsumerRefMut<T> for Subscription<T> {
@@ -42,36 +42,36 @@ impl<T> ConsumerRefMut<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit<'a>(&mut self, _: &'a mut T) {}
-    fn end(&mut self) {}
+    fn end(self) {}
 }
 
-pub trait SubscribableStream<T> : Stream<T> {
+pub trait SubscribableStream<T>: Stream<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(&mut Subscription {
+        self.consume(Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });
     }
 }
 
-pub trait SubscribableStreamRef<T> : StreamRef<T> {
+pub trait SubscribableStreamRef<T>: StreamRef<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(&mut Subscription {
+        self.consume(Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });
     }
 }
 
-pub trait SubscribableStreamRefMut<T> : StreamRefMut<T> {
+pub trait SubscribableStreamRefMut<T>: StreamRefMut<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(&mut Subscription {
+        self.consume(Subscription {
             producer: None,
             marker: PhantomData::<T>,
         });
