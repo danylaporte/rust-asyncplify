@@ -4,7 +4,6 @@ use std::collections::hash_map::*;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::mem::replace;
-use std::ops::{Add, Deref};
 use std::rc::Rc;
 use stream::*;
 
