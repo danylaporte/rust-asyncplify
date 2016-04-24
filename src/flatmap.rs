@@ -2,145 +2,91 @@ use consumer::*;
 use producer::*;
 use std::cell::RefCell;
 use std::marker::PhantomData;
+use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
-struct FlatmapState<'a, F, I, SO, O> {
+struct FlatmapState<C, F, I, O, S>
+    where C: Consumer<O>
+{
+    child: Rc<Child<C, O>>,
     func: F,
     marker_i: PhantomData<I>,
-    marker_o: PhantomData<O>,
-    marker_so: PhantomData<SO>,
-    shared: Rc<RefCell<Shared<'a, O>>>,
+    marker_s: PhantomData<S>,
 }
 
-struct Shared<'a, T> {
-    consumer: &'a mut Consumer<T>,
-    count: usize,
-    producers: Vec<(usize, Option<Rc<Producer>>)>,
-}
-
-impl<'a, T> Shared<'a, T> {
-    fn add_producer(&mut self) -> usize {
-        self.count += 1;
-        self.producers.push((self.count, None));
-        self.count
-    }
-
-    fn new(consumer: &'a mut Consumer<T>) -> Self {
-        let mut s = Shared {
-            consumer: consumer,
-            count: 0,
-            producers: Vec::new(),
-            marker_t: PhantomData::<T>,
-        };
-
-        s.add_producer();
-        s
-    }
-
-    fn init(&mut self, id: usize, producer: Rc<Producer>) {
-        if let Some(index) = self.producers.iter().position(|t| t.0 == id) {
-            let id = self.producers[index].0;
-            self.producers[index] = (id, Some(producer));
-        }
-    }
-
-    fn end(&mut self, id: usize) {
-        let mut is_closable = false;
-
-        if let Some(index) = self.producers.iter().position(|t| t.0 == id) {
-            self.producers.swap_remove(index);
-            is_closable = self.producers.len() == 0;
-        }
-
-        if is_closable {
-            self.consumer.end();
-        }
-    }
-}
-
-struct Child<C, T> {
-    id: usize,
-    shared: Rc<RefCell<Shared<C, T>>>,
-}
-
-impl<C: Consumer<T>, T> Consumer<T> for Child<C, T> {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.shared.borrow_mut().init(self.id, producer);
-    }
-
-    fn emit(&mut self, item: T) {
-        self.shared.borrow_mut().consumer.emit(item);
-    }
-
-    fn end(&mut self) {
-        self.shared.borrow_mut().end(self.id);
-    }
-}
-
-impl<C, F, I, SO, O> Consumer<I> for FlatmapState<C, F, I, SO, O>
-    where C: Consumer<O> + 'static,
-          F: FnMut(I) -> SO,
-          SO: Stream<O>,
-          O: 'static
+impl<C, F, I, O, S> Consumer<I> for FlatmapState<C, F, I, O, S>
+    where C: Consumer<O>,
+          F: FnMut(I) -> S,
+          S: Stream<O>
 {
     fn init(&mut self, producer: Rc<Producer>) {
-
-        let cloned_share = self.shared.clone();
-        let mut shared = self.shared.borrow_mut();
-
-        shared.init(1, producer);
-
-        let rc = Rc::new(Producer::from_func(Box::new(move |_| {
-            let ref mut producers = cloned_share.borrow_mut().producers;
-
-            for t in producers.iter() {
-                if let Some(ref p) = t.1 {
-                    p.close();
-                }
-            }
-
-            producers.clear();
-        })));
-
-        shared.consumer.init(rc);
+        if let Some(ref cell) = self.child.consumer {
+            cell.borrow_mut().init(producer);
+        }
     }
 
     fn emit(&mut self, item: I) {
-        let id = self.shared.borrow_mut().add_producer();
-
-        (self.func)(item).consume(Child {
-            id: id,
-            shared: self.shared.clone(),
-        });
+        let stream = (self.func)(item);
+        stream.consume(self.child.clone());
     }
 
-    fn end(&mut self) {
-        self.shared.borrow_mut().end(1);
+    fn end(self) {}
+}
+
+struct Child<C, O>
+    where C: Consumer<O>
+{
+    consumer: Option<RefCell<C>>,
+    marker_o: PhantomData<O>,
+}
+
+impl<C, O> Consumer<O> for Rc<Child<C, O>>
+    where C: Consumer<O>
+{
+    fn init(&mut self, _: Rc<Producer>) {}
+
+    fn emit(&mut self, item: O) {
+        if let Some(ref cell) = self.consumer {
+            cell.borrow_mut().emit(item);
+        }
+    }
+
+    fn end(self) {}
+}
+
+impl<C, O> Drop for Child<C, O>
+    where C: Consumer<O>
+{
+    fn drop(&mut self) {
+        if let Some(cell) = replace(&mut self.consumer, None) {
+            cell.into_inner().end();
+        }
     }
 }
 
 pub struct Flatmap<S, F, I, SO, O> {
-    stream: S,
     func: F,
     marker_i: PhantomData<I>,
     marker_o: PhantomData<O>,
     marker_so: PhantomData<SO>,
+    stream: S,
 }
 
 impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
     where S: Stream<I>,
           F: FnMut(I) -> SO,
-          SO: Stream<O>,
-          O: 'static
+          SO: Stream<O>
 {
-    fn consume(self, consumer: &mut Consumer<O>) {
-        self.stream.consume(&mut FlatmapState {
+    fn consume<C: Consumer<O>>(self, consumer: C) {
+        self.stream.consume(FlatmapState {
+            child: Rc::new(Child {
+                consumer: Some(RefCell::new(consumer)),
+                marker_o: PhantomData::<O>,
+            }),
             func: self.func,
             marker_i: PhantomData::<I>,
-            marker_o: PhantomData::<O>,
-            marker_so: self.marker_so,
-            shared: Rc::new(RefCell::new(Shared::new(consumer))),
+            marker_s: PhantomData::<SO>,
         });
     }
 }
@@ -152,11 +98,11 @@ pub trait FlatmapStream<I>: Stream<I> {
               SO: Stream<O>
     {
         Flatmap {
-            stream: self,
             func: func,
             marker_i: PhantomData::<I>,
-            marker_so: PhantomData::<SO>,
             marker_o: PhantomData::<O>,
+            marker_so: PhantomData::<SO>,
+            stream: self,
         }
     }
 }
