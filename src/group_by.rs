@@ -8,8 +8,16 @@ use std::rc::Rc;
 use stream::*;
 
 pub struct Group<K, V> {
-    consumer: Option<Box<ConsumerBox<V>>>,
+    consumer: Option<Box<BoxedConsumer<V>>>,
     key: K,
+}
+
+impl<K, V> Stream<V> for Group<K, V>
+    where V: 'static
+{
+    fn consume<C: Consumer<V> + 'static>(mut self, consumer: C) {
+        self.consumer = Some(Box::new(ConsumerBox::from(consumer)));
+    }
 }
 
 impl<K: Copy, V> Group<K, V> {
