@@ -89,7 +89,25 @@ impl<F, K, S, V> StreamRef<Group<K, V>> for GroupByFactory<F, K, S, V>
     }
 }
 
-pub trait GroupByStream<T>: StreamRefMut<T> {
+pub trait GroupByStream<T>: Stream<T> {
+    /// Group incoming values using a `key_selector`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut vec = Vec::new();
+    ///
+    /// (0..10)
+    ///     .to_stream()
+    ///     .group_by(|v| v % 2)
+    ///     .tap(|g| vec.push(g.get_key()))
+    ///     .subscribe();
+    ///
+    /// // This gives 2 groups
+    /// assert!(vec == vec!(0, 1), "vec = {:?}", vec);
+    /// ```
     fn group_by<F: FnMut(&V) -> K, K, V>(self, key_selector: F) -> GroupByFactory<F, K, Self, V>
         where Self: Sized
     {
@@ -102,4 +120,4 @@ pub trait GroupByStream<T>: StreamRefMut<T> {
     }
 }
 
-impl<S, T> GroupByStream<T> for S where S: StreamRefMut<T> {}
+impl<S, T> GroupByStream<T> for S where S: Stream<T> {}
