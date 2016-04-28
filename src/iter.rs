@@ -25,8 +25,6 @@ impl<I, T> Stream<T> for IterStream<I>
                 return;
             }
         }
-
-        consumer.end();
     }
 }
 

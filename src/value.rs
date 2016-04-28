@@ -53,10 +53,6 @@ impl<T> Stream<T> for Value<T> {
         if !producer.is_closed() {
             consumer.emit(self.value);
         }
-
-        if !producer.is_closed() {
-            consumer.end();
-        }
     }
 }
 
@@ -69,10 +65,6 @@ impl<T> StreamRef<T> for ValueRef<T> {
         if !producer.is_closed() {
             consumer.emit(&self.value);
         }
-
-        if !producer.is_closed() {
-            consumer.end();
-        }
     }
 }
 
@@ -84,10 +76,6 @@ impl<T> StreamRefMut<T> for ValueRefMut<T> {
 
         if !producer.is_closed() {
             consumer.emit(&mut self.value);
-        }
-
-        if !producer.is_closed() {
-            consumer.end();
         }
     }
 }

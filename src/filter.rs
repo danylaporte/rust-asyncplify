@@ -23,10 +23,6 @@ impl<C, F, T> Consumer<T> for FilterState<C, F, T>
             self.consumer.emit(item);
         }
     }
-
-    fn end(self) {
-        self.consumer.end();
-    }
 }
 
 /// Describe a filter for a `stream`.

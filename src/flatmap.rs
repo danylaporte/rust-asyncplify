@@ -2,7 +2,6 @@ use consumer::*;
 use producer::*;
 use std::cell::RefCell;
 use std::marker::PhantomData;
-use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
@@ -30,8 +29,6 @@ impl<C, F, I, O, S> Consumer<I> for FlatmapState<C, F, I, O, S>
         let stream = (self.func)(item);
         stream.consume(self.child.clone());
     }
-
-    fn end(self) {}
 }
 
 struct Child<C, O>
@@ -49,18 +46,6 @@ impl<C, O> Consumer<O> for Rc<Child<C, O>>
     fn emit(&mut self, item: O) {
         if let Some(ref cell) = self.consumer {
             cell.borrow_mut().emit(item);
-        }
-    }
-
-    fn end(self) {}
-}
-
-impl<C, O> Drop for Child<C, O>
-    where C: Consumer<O>
-{
-    fn drop(&mut self) {
-        if let Some(cell) = replace(&mut self.consumer, None) {
-            cell.into_inner().end();
         }
     }
 }

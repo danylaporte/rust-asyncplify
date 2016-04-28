@@ -6,7 +6,9 @@ use std::ops::Add;
 use std::rc::Rc;
 use stream::*;
 
-struct FoldState<C, F, I, O> {
+struct FoldState<C, F, I, O>
+    where C: Consumer<O>
+{
     consumer: C,
     func: F,
     value: Option<O>,
@@ -25,11 +27,15 @@ impl<C, F, I, O> Consumer<I> for FoldState<C, F, I, O>
         let v = replace(&mut self.value, None).unwrap();
         self.value = Some((self.func)(v, item));
     }
+}
 
-    fn end(mut self) {
-        let v = replace(&mut self.value, None).unwrap();
-        self.consumer.emit(v);
-        self.consumer.end();
+impl<C, F, I, O> Drop for FoldState<C, F, I, O>
+    where C: Consumer<O>
+{
+    fn drop(&mut self) {
+        if let Some(v) = replace(&mut self.value, None) {
+            self.consumer.emit(v);
+        }
     }
 }
 

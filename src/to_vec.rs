@@ -4,7 +4,9 @@ use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
-struct ToVecState<C, F, T> {
+struct ToVecState<C, F, T>
+    where C: Consumer<Vec<T>>
+{
     consumer: C,
     splitter: F,
     vec: Vec<T>,
@@ -13,6 +15,17 @@ struct ToVecState<C, F, T> {
 pub struct ToVec<S, F> {
     stream: S,
     splitter: F,
+}
+
+impl<C, F, T> Drop for ToVecState<C, F, T>
+    where C: Consumer<Vec<T>>
+{
+    fn drop(&mut self) {
+        if self.vec.len() != 0 {
+            let vec = replace(&mut self.vec, Vec::new());
+            self.consumer.emit(vec);
+        }
+    }
 }
 
 impl<C, F, T> Consumer<T> for ToVecState<C, F, T>
@@ -30,15 +43,6 @@ impl<C, F, T> Consumer<T> for ToVecState<C, F, T>
             let vec = replace(&mut self.vec, Vec::new());
             self.consumer.emit(vec);
         }
-    }
-
-    fn end(mut self) {
-        if self.vec.len() != 0 {
-            let vec = replace(&mut self.vec, Vec::new());
-            self.consumer.emit(vec);
-        }
-
-        self.consumer.end();
     }
 }
 

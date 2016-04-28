@@ -17,13 +17,7 @@ pub struct Empty;
 
 impl Stream<()> for Empty {
     fn consume<C: Consumer<()>>(self, mut consumer: C) {
-        let producer = Rc::new(Producer::new());
-
-        consumer.init(producer.clone());
-
-        if !producer.is_closed() {
-            consumer.end();
-        }
+        consumer.init(Rc::new(Producer::new()));
     }
 }
 

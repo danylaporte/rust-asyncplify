@@ -29,10 +29,6 @@ impl<C, F, I, O> Consumer<I> for MapState<C, F, I, O>
     fn emit(&mut self, item: I) {
         self.consumer.emit((self.func)(item));
     }
-
-    fn end(self) {
-        self.consumer.end();
-    }
 }
 
 impl<S, F, I, O> Stream<O> for Map<S, F, I, O>

@@ -3,12 +3,11 @@ use producer::*;
 use std::collections::hash_map::*;
 use std::hash::Hash;
 use std::marker::PhantomData;
-use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
 pub struct Group<K, V> {
-    consumer: Option<Box<BoxedConsumer<V>>>,
+    consumer: Option<Box<Consumer<V>>>,
     key: K,
 }
 
@@ -16,7 +15,7 @@ impl<K, V> Stream<V> for Group<K, V>
     where V: 'static
 {
     fn consume<C: Consumer<V> + 'static>(mut self, consumer: C) {
-        self.consumer = Some(Box::new(ConsumerBox::from(consumer)));
+        self.consumer = Some(Box::new(consumer));
     }
 }
 
@@ -35,12 +34,6 @@ impl<K: Copy, V> Group<K, V> {
     fn emit(&mut self, item: V) {
         if let Some(ref mut consumer) = self.consumer {
             consumer.emit(item);
-        }
-    }
-
-    fn end(mut self) {
-        if let Some(consumer) = replace(&mut self.consumer, None) {
-            consumer.end();
         }
     }
 }
@@ -72,14 +65,6 @@ impl<C, F, K, V> Consumer<V> for GroupBy<C, F, K, V>
                         });
 
         group.emit(item);
-    }
-
-    fn end(mut self) {
-        for (_, v) in self.hashmap.drain() {
-            v.end();
-        }
-
-        self.consumer.end();
     }
 }
 

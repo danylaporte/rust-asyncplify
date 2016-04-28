@@ -27,10 +27,6 @@ impl<C, F: FnMut(&T), T> Consumer<T> for TapState<C, F, T>
         (self.func)(&item);
         self.consumer.emit(item);
     }
-
-    fn end(self) {
-        self.consumer.end();
-    }
 }
 
 impl<S, F, T> Stream<T> for Tap<S, F>

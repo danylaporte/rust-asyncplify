@@ -26,7 +26,6 @@ impl<T> Consumer<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit(&mut self, _: T) {}
-    fn end(self) {}
 }
 
 impl<T> ConsumerRef<T> for Subscription<T> {
@@ -34,7 +33,6 @@ impl<T> ConsumerRef<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit<'a>(&mut self, _: &'a T) {}
-    fn end(self) {}
 }
 
 impl<T> ConsumerRefMut<T> for Subscription<T> {
@@ -42,7 +40,6 @@ impl<T> ConsumerRefMut<T> for Subscription<T> {
         self.producer = Some(producer);
     }
     fn emit<'a>(&mut self, _: &'a mut T) {}
-    fn end(self) {}
 }
 
 pub trait SubscribableStream<T>: Stream<T> {
