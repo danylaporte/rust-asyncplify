@@ -1,12 +1,6 @@
 use producer::*;
 use std::rc::Rc;
 
-pub trait BoxedConsumer<T> {
-    fn init(&mut self, Rc<Producer>);
-    fn emit(&mut self, T);
-    fn end(self: Box<Self>);
-}
-
 pub trait Consumer<T> {
     fn init(&mut self, Rc<Producer>);
     fn emit(&mut self, T);
