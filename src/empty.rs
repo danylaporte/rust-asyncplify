@@ -10,30 +10,18 @@ use stream::*;
 /// ```
 /// use asyncplify::*;
 ///
+/// let mut count = 0;
+///
 /// Empty
+///     .tap(|_| count += 1)
 ///     .subscribe();
+///
+/// assert!(count == 0, "count = {}", count);
 /// ```
 pub struct Empty;
 
 impl Stream<()> for Empty {
     fn consume<C: Consumer<()>>(self, mut consumer: C) {
         consumer.init(Rc::new(Producer::new()));
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use subscription::*;
-    use tap::*;
-
-    #[test]
-    fn it_works() {
-        let mut count = 0;
-
-        Empty.tap(|_| count += 1)
-             .subscribe();
-
-        assert!(count == 0, "count = {}", count);
     }
 }
