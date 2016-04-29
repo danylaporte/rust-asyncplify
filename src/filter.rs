@@ -12,14 +12,14 @@ struct FilterState<C, F, T> {
 
 impl<C, F, T> Consumer<T> for FilterState<C, F, T>
     where C: Consumer<T>,
-          F: FnMut(&T) -> bool
+          F: FnMut(&mut T) -> bool
 {
     fn init(&mut self, producer: Rc<Producer>) {
         self.consumer.init(producer);
     }
 
-    fn emit(&mut self, item: T) {
-        if (self.func)(&item) {
+    fn emit(&mut self, mut item: T) {
+        if (self.func)(&mut item) {
             self.consumer.emit(item);
         }
     }
@@ -34,7 +34,7 @@ pub struct Filter<S, F, T> {
 
 impl<S, F, T> Stream<T> for Filter<S, F, T>
     where S: Stream<T>,
-          F: FnMut(&T) -> bool
+          F: FnMut(&mut T) -> bool
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
         self.stream.consume(FilterState {
@@ -52,16 +52,21 @@ pub trait FilterableStream<T>: Stream<T> {
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;    
+    /// use asyncplify::*;
     ///
-    /// (0..10)
+    /// let mut sum = 0;
+    ///
+    /// (0..5)
     ///     .to_stream()
-    ///     .filter(|v| v % 2 == 0)
+    ///     .filter(|v| *v > 2)
+    ///     .tap(|v| sum += *v)
     ///     .subscribe();
+    ///
+    /// assert!(sum == 7, "sum (3 + 4) = {}", sum);
     /// ``` 
     fn filter<F>(self, func: F) -> Filter<Self, F, T>
         where Self: Sized,
-              F: FnMut(&T) -> bool
+              F: FnMut(&mut T) -> bool
     {
         Filter {
             stream: self,
@@ -72,25 +77,3 @@ pub trait FilterableStream<T>: Stream<T> {
 }
 
 impl<S, T> FilterableStream<T> for S where S: Stream<T> {}
-
-#[cfg(test)]
-mod tests {
-    use fold::*;
-    use iter::*;
-    use subscription::*;
-    use super::*;
-    use tap::*;
-
-    #[test]
-    fn it_works() {
-        let mut f = 0;
-        (0..10)
-            .to_stream()
-            .filter(|v| *v < 4)
-            .sum()
-            .tap(|v| f = *v)
-            .subscribe();
-
-        assert!(f == 6, "f = {}", f);
-    }
-}
