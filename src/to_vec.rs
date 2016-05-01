@@ -60,8 +60,27 @@ impl<S, F, T> Stream<Vec<T>> for ToVec<S, F>
 }
 
 pub trait ToVecStream<T>: Stream<T> {
+    /// Bundle incoming elements into a `Vec`. A split function can be specified
+    /// to emit a `Vec` when the splitter returns true. The remaing `Vec` is emited
+    /// only when not empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut v = Vec::new();
+    ///
+    /// (0..3)
+    ///     .to_stream()
+    ///     .to_vec(|vec| vec.len() == 2)  // split after 2 items
+    ///     .tap(|vec| v.push(vec.len()))
+    ///     .subscribe();
+    ///
+    /// assert!(v == [2, 1], "v = {:?}", v);
+    /// ```
     fn to_vec<F>(self, splitter: F) -> ToVec<Self, F>
-        where F: FnMut(&Vec<T>),
+        where F: FnMut(&Vec<T>) -> bool,
               Self: Sized
     {
         ToVec {

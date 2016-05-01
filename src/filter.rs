@@ -54,15 +54,15 @@ pub trait FilterableStream<T>: Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let mut sum = 0;
+    /// let mut vec = Vec::new();
     ///
     /// (0..5)
     ///     .to_stream()
     ///     .filter(|v| *v > 2)
-    ///     .tap(|v| sum += *v)
+    ///     .tap(|v| vec.push(*v))
     ///     .subscribe();
     ///
-    /// assert!(sum == 7, "sum (3 + 4) = {}", sum);
+    /// assert!(vec == &[3, 4], "vec = {:?}", vec);
     /// ``` 
     fn filter<F>(self, func: F) -> Filter<Self, F, T>
         where Self: Sized,
