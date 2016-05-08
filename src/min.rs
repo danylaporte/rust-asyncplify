@@ -27,7 +27,7 @@ impl<C, T> Consumer<T> for MinState<C, T>
                 return;
             }
         }
-        
+
         self.value = Some(item);
     }
 }
