@@ -1,4 +1,5 @@
 mod consumer;
+mod count;
 mod empty;
 mod filter;
 mod flatmap;
@@ -15,6 +16,7 @@ mod to_vec;
 mod value;
 
 pub use consumer::*;
+pub use count::*;
 pub use empty::*;
 pub use filter::*;
 pub use flatmap::*;
