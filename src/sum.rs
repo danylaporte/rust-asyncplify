@@ -59,16 +59,12 @@ pub trait SumStream<T>: Stream<T> {
     ///
     /// ```
     /// use asyncplify::*;
-    /// let mut value = 0;
-    ///
-    /// (0..10)
+    /// let vec = (0..10)
     ///     .to_stream()
     ///     .sum()
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 45, "value = {:?}", value);
+    ///     .into_vec();
+    /// assert!(vec == [45], "vec = {:?}", vec);
     /// ```
-
     fn sum(self) -> Sum<Self>
         where Self: Sized
     {

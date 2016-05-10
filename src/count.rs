@@ -54,20 +54,20 @@ pub trait CountStream<T>: Stream<T> {
     ///
     /// ```
     /// use asyncplify::*;
-    /// let mut value = 0;
     ///
-    /// (0..10)
+    /// let vec = (0..10)
     ///     .to_stream()
     ///     .count()
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 10, "value = {:?}", value);
+    ///     .into_vec();
+    /// assert!(vec == [10], "vec = {:?}", vec);
     /// ```
-
     fn count(self) -> Count<Self, T>
         where Self: Sized
     {
-        Count { stream: self, marker_t: PhantomData::<T>, }
+        Count {
+            stream: self,
+            marker_t: PhantomData::<T>,
+        }
     }
 }
 
