@@ -1,16 +1,14 @@
 use consumer::*;
 use producer::*;
-use std::marker::PhantomData;
 use std::rc::Rc;
 use stream::*;
 
-struct FilterState<C, F, T> {
+struct FilterState<C, F> {
     consumer: C,
-    func: F,
-    marker_t: PhantomData<T>,
+    predicate: F,
 }
 
-impl<C, F, T> Consumer<T> for FilterState<C, F, T>
+impl<C, F, T> Consumer<T> for FilterState<C, F>
     where C: Consumer<T>,
           F: FnMut(&mut T) -> bool
 {
@@ -19,61 +17,35 @@ impl<C, F, T> Consumer<T> for FilterState<C, F, T>
     }
 
     fn emit(&mut self, mut item: T) {
-        if (self.func)(&mut item) {
+        if (self.predicate)(&mut item) {
             self.consumer.emit(item);
         }
     }
 }
 
 /// Describe a filter for a `stream`.
-pub struct Filter<S, F, T> {
+pub struct Filter<S, F> {
     stream: S,
-    func: F,
-    marker: PhantomData<T>,
+    predicate: F,
 }
 
-impl<S, F, T> Stream<T> for Filter<S, F, T>
+impl<S, F, T> Stream<T> for Filter<S, F>
     where S: Stream<T>,
           F: FnMut(&mut T) -> bool
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
         self.stream.consume(FilterState {
             consumer: consumer,
-            func: self.func,
-            marker_t: PhantomData::<T>,
+            predicate: self.predicate,
         });
     }
 }
 
-/// Represent a filtrable `stream`.
-pub trait FilterableStream<T>: Stream<T> {
-    /// Filter a `Stream` based on a func `Stream`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let mut vec = Vec::new();
-    ///
-    /// (0..5)
-    ///     .to_stream()
-    ///     .filter(|v| *v > 2)
-    ///     .tap(|v| vec.push(*v))
-    ///     .subscribe();
-    ///
-    /// assert!(vec == &[3, 4], "vec = {:?}", vec);
-    /// ``` 
-    fn filter<F>(self, func: F) -> Filter<Self, F, T>
-        where Self: Sized,
-              F: FnMut(&mut T) -> bool
-    {
+impl<S, F> Filter<S, F> {
+    pub fn new(stream: S, predicate: F) -> Self {
         Filter {
-            stream: self,
-            func: func,
-            marker: PhantomData::<T>,
+            predicate: predicate,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> FilterableStream<T> for S where S: Stream<T> {}

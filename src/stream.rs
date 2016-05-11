@@ -1,5 +1,6 @@
 use consumer::*;
 use count::*;
+use filter::*;
 use max::*;
 use max_by::*;
 use min::*;
@@ -30,6 +31,30 @@ pub trait Stream<T> {
         where Self: Sized
     {
         Count::new(self)
+    }
+
+    /// Filter a `Stream` based on a predicate `Stream`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut vec = Vec::new();
+    ///
+    /// (0..5)
+    ///     .to_stream()
+    ///     .filter(|v| *v > 2)
+    ///     .tap(|v| vec.push(*v))
+    ///     .subscribe();
+    ///
+    /// assert!(vec == &[3, 4], "vec = {:?}", vec);
+    /// ``` 
+    fn filter<F>(self, predicate: F) -> Filter<Self, F>
+        where Self: Sized,
+              F: FnMut(&mut T) -> bool
+    {
+        Filter::new(self, predicate)
     }
 
     /// Emit the item corresponding to the maximum value.
