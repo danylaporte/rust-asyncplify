@@ -69,32 +69,12 @@ impl<S, T, F, K> Stream<T> for MaxBy<S, F, K>
     }
 }
 
-pub trait MaxByStream<T>: Stream<T> {
-    /// Emit the item corresponding to the maximum value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
-    ///
-    /// (0..10)
-    ///     .to_stream()
-    ///     .max_by(|v| 10 - *v)
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 0, "value = {:?}", value);
-    /// ```
-
-    fn max_by<F: FnMut(&T) -> K, K>(self, f: F) -> MaxBy<Self, F, K>
-        where Self: Sized
-    {
+impl<S, F, K> MaxBy<S, F, K> {
+    pub fn new(stream: S, f: F) -> Self {
         MaxBy {
-            stream: self,
             f: f,
             marker_k: PhantomData::<K>,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> MaxByStream<T> for S where S: Stream<T> {}

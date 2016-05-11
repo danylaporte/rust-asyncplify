@@ -69,32 +69,12 @@ impl<S, T, F, K> Stream<T> for MinBy<S, F, K>
     }
 }
 
-pub trait MinByStream<T>: Stream<T> {
-    /// Emit the item corresponding to the minimum value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
-    ///
-    /// (0..10)
-    ///     .to_stream()
-    ///     .min_by(|v| 10 - *v)
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 9, "value = {:?}", value);
-    /// ```
-
-    fn min_by<F: FnMut(&T) -> K, K>(self, f: F) -> MinBy<Self, F, K>
-        where Self: Sized
-    {
+impl<S, F, K> MinBy<S, F, K> {
+    pub fn new(stream: S, f: F) -> Self {
         MinBy {
-            stream: self,
             f: f,
             marker_k: PhantomData::<K>,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> MinByStream<T> for S where S: Stream<T> {}

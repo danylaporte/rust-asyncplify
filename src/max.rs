@@ -27,7 +27,7 @@ impl<C, T> Consumer<T> for MaxState<C, T>
                 return;
             }
         }
-        
+
         self.value = Some(item);
     }
 }
@@ -59,28 +59,8 @@ impl<S, T> Stream<T> for Max<S>
     }
 }
 
-pub trait MaxStream<T>: Stream<T> {
-    /// Emit the item corresponding to the maximum value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let mut value = 0;
-    ///
-    /// (0..10)
-    ///     .to_stream()
-    ///     .max()
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 9, "value = {:?}", value);
-    /// ```
-
-    fn max(self) -> Max<Self>
-        where Self: Sized
-    {
-        Max { stream: self }
+impl<S> Max<S> {
+    pub fn new(stream: S) -> Self {
+        Max { stream: stream }
     }
 }
-
-impl<S, T> MaxStream<T> for S where S: Stream<T> {}

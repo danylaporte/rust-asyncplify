@@ -50,28 +50,11 @@ impl<S, T> Stream<T> for SkipLast<S>
     }
 }
 
-pub trait SkipLastStream<I>: Stream<I> {
-    /// Ignores the last X values of the stream
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .skip_last(3)
-    ///     .into_vec();
-    /// assert!(vec == [0, 1, 2, 3, 4, 5, 6], "vec = {:?}", vec);
-    /// ```
-    fn skip_last(self, count: usize) -> SkipLast<Self>
-        where Self: Sized
-    {
+impl<S> SkipLast<S> {
+    pub fn new(stream: S, count: usize) -> Self {
         SkipLast {
             count: count,
-            stream: self,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> SkipLastStream<T> for S where S: Stream<T> {}

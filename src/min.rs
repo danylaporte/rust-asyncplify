@@ -59,28 +59,8 @@ impl<S, T> Stream<T> for Min<S>
     }
 }
 
-pub trait MinStream<T>: Stream<T> {
-    /// Emit the item corresponding to the minimum value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
-    ///
-    /// (0..10)
-    ///     .to_stream()
-    ///     .min()
-    ///     .tap(|v| value = *v)
-    ///     .subscribe();
-    /// assert!(value == 0, "value = {:?}", value);
-    /// ```
-
-    fn min(self) -> Min<Self>
-        where Self: Sized
-    {
-        Min { stream: self }
+impl<S> Min<S> {
+    pub fn new(stream: S) -> Self {
+        Min { stream: stream }
     }
 }
-
-impl<S, T> MinStream<T> for S where S: Stream<T> {}

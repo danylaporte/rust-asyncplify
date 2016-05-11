@@ -40,28 +40,11 @@ impl<S, T> Stream<T> for Skip<S>
     }
 }
 
-pub trait SkipStream<I>: Stream<I> {
-    /// Ignore the first X values from the stream
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .skip(3)
-    ///     .into_vec();
-    /// assert!(vec == [3, 4, 5, 6, 7, 8, 9], "vec = {:?}", vec);
-    /// ```
-    fn skip(self, count: u64) -> Skip<Self>
-        where Self: Sized
-    {
+impl<S> Skip<S> {
+    pub fn new(stream: S, count: u64) -> Self {
         Skip {
             count: count,
-            stream: self,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> SkipStream<T> for S where S: Stream<T> {}

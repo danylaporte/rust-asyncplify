@@ -49,28 +49,11 @@ impl<S, T> Stream<T> for Take<S>
     }
 }
 
-pub trait TakeStream<I>: Stream<I> {
-    /// Take only the first X values of the stream and close the stream after
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .take(3)
-    ///     .into_vec();
-    /// assert!(vec == [0, 1, 2], "vec = {:?}", vec);
-    /// ```
-    fn take(self, count: u64) -> Take<Self>
-        where Self: Sized
-    {
+impl<S> Take<S> {
+    pub fn new(stream: S, count: u64) -> Self {
         Take {
             count: count,
-            stream: self,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> TakeStream<T> for S where S: Stream<T> {}

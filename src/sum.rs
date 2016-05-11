@@ -52,24 +52,8 @@ impl<S, T> Stream<T> for Sum<S>
     }
 }
 
-pub trait SumStream<T>: Stream<T> {
-    /// Calculate the sum of the item received.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .sum()
-    ///     .into_vec();
-    /// assert!(vec == [45], "vec = {:?}", vec);
-    /// ```
-    fn sum(self) -> Sum<Self>
-        where Self: Sized
-    {
-        Sum { stream: self }
+impl<S> Sum<S> {
+    pub fn new(stream: S) -> Self {
+        Sum { stream: stream }
     }
 }
-
-impl<S, T> SumStream<T> for S where S: Stream<T> {}

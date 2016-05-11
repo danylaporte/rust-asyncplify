@@ -65,28 +65,11 @@ impl<S, T> Stream<T> for TakeLast<S>
     }
 }
 
-pub trait TakeLastStream<I>: Stream<I> {
-    /// Take the only the last X values of the stream and close the stream after
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .take_last(3)
-    ///     .into_vec();
-    /// assert!(vec == [7, 8, 9], "vec = {:?}", vec);
-    /// ```
-    fn take_last(self, count: usize) -> TakeLast<Self>
-        where Self: Sized
-    {
+impl<S> TakeLast<S> {
+    pub fn new(stream: S, count: usize) -> Self {
         TakeLast {
             count: count,
-            stream: self,
+            stream: stream,
         }
     }
 }
-
-impl<S, T> TakeLastStream<T> for S where S: Stream<T> {}
