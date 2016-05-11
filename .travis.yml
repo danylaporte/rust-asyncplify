@@ -30,7 +30,6 @@ script:
       travis-cargo bench &&
       travis-cargo --only stable doc
 after_success:
-  - travis encrypt GH_TOKEN=$GithubToken --add env.global
   # upload the documentation from the build with stable (automatically only actually
   # runs on the master branch, not individual PRs)
   - travis-cargo --only stable doc-upload
