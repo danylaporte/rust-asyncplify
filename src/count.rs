@@ -47,28 +47,11 @@ impl<S, T> Stream<u64> for Count<S, T>
     }
 }
 
-pub trait CountStream<T>: Stream<T> {
-    /// Count the number ofthe item received.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let vec = (0..10)
-    ///     .to_stream()
-    ///     .count()
-    ///     .into_vec();
-    /// assert!(vec == [10], "vec = {:?}", vec);
-    /// ```
-    fn count(self) -> Count<Self, T>
-        where Self: Sized
-    {
+impl<S, T> Count<S, T> {
+    pub fn new(stream: S) -> Self {
         Count {
-            stream: self,
+            stream: stream,
             marker_t: PhantomData::<T>,
         }
     }
 }
-
-impl<S, T> CountStream<T> for S where S: Stream<T> {}

@@ -1,4 +1,5 @@
 use consumer::*;
+use count::*;
 use max::*;
 use max_by::*;
 use min::*;
@@ -11,6 +12,25 @@ use take_last::*;
 
 pub trait Stream<T> {
     fn consume<C: Consumer<T>>(self, consumer: C);
+
+    /// Count the number ofthe item received.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..10)
+    ///     .to_stream()
+    ///     .count()
+    ///     .into_vec();
+    /// assert!(vec == [10], "vec = {:?}", vec);
+    /// ```
+    fn count(self) -> Count<Self, T>
+        where Self: Sized
+    {
+        Count::new(self)
+    }
 
     /// Emit the item corresponding to the maximum value.
     ///
@@ -173,7 +193,7 @@ pub trait Stream<T> {
 
     /// Take the only the last X values of the stream and close the stream after
     ///
-    /// # Examples    /// # Examples
+    /// # Examples
     ///
     /// ```
     /// use asyncplify::*;
