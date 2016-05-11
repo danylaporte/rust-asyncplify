@@ -30,6 +30,7 @@ script:
       travis-cargo bench &&
       travis-cargo --only stable doc
 after_success:
+  - travis encrypt GH_TOKEN=$GithubToken --add env.global
   # upload the documentation from the build with stable (automatically only actually
   # runs on the master branch, not individual PRs)
   - travis-cargo --only stable doc-upload
@@ -42,5 +43,6 @@ env:
   global:
     # override the default `--features unstable` used for the nightly branch (optional)
     #- TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
+    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
     # encrypted github token for doc upload (see `GH_TOKEN` link above)
-    - secure: $GithubToken
+    - secure: "$GithubToken"
