@@ -28,20 +28,6 @@ impl<T> Consumer<T> for Subscription<T> {
     fn emit(&mut self, _: T) {}
 }
 
-impl<T> ConsumerRef<T> for Subscription<T> {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.producer = Some(producer);
-    }
-    fn emit<'a>(&mut self, _: &'a T) {}
-}
-
-impl<T> ConsumerRefMut<T> for Subscription<T> {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.producer = Some(producer);
-    }
-    fn emit<'a>(&mut self, _: &'a mut T) {}
-}
-
 pub trait SubscribableStream<T>: Stream<T> {
     fn subscribe(self)
         where Self: Sized
@@ -53,28 +39,4 @@ pub trait SubscribableStream<T>: Stream<T> {
     }
 }
 
-pub trait SubscribableStreamRef<T>: StreamRef<T> {
-    fn subscribe(self)
-        where Self: Sized
-    {
-        self.consume(Subscription {
-            producer: None,
-            marker: PhantomData::<T>,
-        });
-    }
-}
-
-pub trait SubscribableStreamRefMut<T>: StreamRefMut<T> {
-    fn subscribe(self)
-        where Self: Sized
-    {
-        self.consume(Subscription {
-            producer: None,
-            marker: PhantomData::<T>,
-        });
-    }
-}
-
 impl<S, T> SubscribableStream<T> for S where S: Stream<T> {}
-impl<S, T> SubscribableStreamRef<T> for S where S: StreamRef<T> {}
-impl<S, T> SubscribableStreamRefMut<T> for S where S: StreamRefMut<T> {}
