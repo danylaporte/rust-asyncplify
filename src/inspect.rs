@@ -8,6 +8,7 @@ struct InspectState<C, F> {
     func: F,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Inspect<S, F> {
     func: F,
     stream: S,

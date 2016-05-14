@@ -38,6 +38,7 @@ impl<C, F, I, O> Drop for FoldState<C, F, I, O>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Fold<S, I, F, O> {
     func: F,
     initial: O,

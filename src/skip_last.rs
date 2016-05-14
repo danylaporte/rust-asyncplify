@@ -12,6 +12,7 @@ struct SkipLastState<C, T>
     queue: VecDeque<T>,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct SkipLast<S> {
     count: usize,
     stream: S,

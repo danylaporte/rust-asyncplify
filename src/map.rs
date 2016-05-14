@@ -11,6 +11,7 @@ struct MapState<C, F, I, O> {
     marker_o: PhantomData<O>,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Map<S, F, I, O> {
     stream: S,
     func: F,

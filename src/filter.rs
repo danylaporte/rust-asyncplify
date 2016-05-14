@@ -24,6 +24,7 @@ impl<C, F, T> Consumer<T> for FilterState<C, F>
 }
 
 /// Describe a filter for a `stream`.
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Filter<S, F> {
     stream: S,
     predicate: F,

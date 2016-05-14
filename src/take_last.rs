@@ -13,6 +13,7 @@ struct TakeLastState<C, T>
     queue: VecDeque<T>,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct TakeLast<S> {
     count: usize,
     stream: S,

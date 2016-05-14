@@ -43,6 +43,7 @@ impl<C, T> Drop for MinState<C, T>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Min<S> {
     stream: S,
 }

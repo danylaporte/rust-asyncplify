@@ -43,6 +43,7 @@ impl<C, T> Drop for MaxState<C, T>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Max<S> {
     stream: S,
 }

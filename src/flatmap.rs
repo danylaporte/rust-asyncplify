@@ -50,6 +50,7 @@ impl<C, O> Consumer<O> for Rc<Child<C, O>>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Flatmap<S, F, I, SO, O> {
     func: F,
     marker_i: PhantomData<I>,

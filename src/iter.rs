@@ -4,6 +4,7 @@ use std::rc::Rc;
 use stream::*;
 
 /// Represent a stream on an iterator.
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct IterStream<I> {
     iterator: I,
 }

@@ -18,6 +18,7 @@ use stream::*;
 ///
 /// assert!(count == 0, "count = {}", count);
 /// ```
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Empty;
 
 impl Stream<()> for Empty {

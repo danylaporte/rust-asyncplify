@@ -8,6 +8,7 @@ struct SkipState<C> {
     count: u64,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Skip<S> {
     count: u64,
     stream: S,

@@ -36,6 +36,7 @@ impl<C, T> Drop for SumState<C, T>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Sum<S> {
     stream: S,
 }

@@ -49,6 +49,7 @@ impl<C, T, F, K> Drop for MinByKeyState<C, T, F, K>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct MinByKey<S, F, K> {
     f: F,
     marker_k: PhantomData<K>,

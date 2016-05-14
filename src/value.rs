@@ -3,6 +3,7 @@ use producer::*;
 use std::rc::Rc;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Value<T> {
     value: T,
 }

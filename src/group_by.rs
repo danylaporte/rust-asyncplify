@@ -46,6 +46,7 @@ impl<K: Clone, V> Group<K, V> {
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct GroupBy<C, F, K, V> {
     consumer: C,
     hashmap: HashMap<K, Group<K, V>>,

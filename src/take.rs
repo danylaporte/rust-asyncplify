@@ -10,6 +10,7 @@ struct TakeState<C> {
     producer: Option<Rc<Producer>>,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Take<S> {
     count: u64,
     stream: S,
