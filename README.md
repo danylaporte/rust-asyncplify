@@ -22,7 +22,7 @@ fn main() {
         .to_stream()        // convert the iterator into a to_stream
         .map(|v| v + 10)    // add 10 to all elements of the stream
         .sum()              // sum it up
-        .tap(|v| println!("the sum is {}", *v)) // print the sum
+        .inspect(|v| println!("the sum is {}", *v)) // print the sum
         .subscribe();       // subscribe to the stream, similar to collect
 }
 ``` 

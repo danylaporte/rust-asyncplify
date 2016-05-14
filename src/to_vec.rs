@@ -74,7 +74,7 @@ pub trait ToVecStream<T>: Stream<T> {
     /// (0..3)
     ///     .to_stream()
     ///     .to_vec(|vec| vec.len() == 2)  // split after 2 items
-    ///     .tap(|vec| v.push(vec.len()))
+    ///     .inspect(|vec| v.push(vec.len()))
     ///     .subscribe();
     ///
     /// assert!(v == [2, 1], "v = {:?}", v);

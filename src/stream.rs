@@ -45,7 +45,7 @@ pub trait Stream<T> {
     /// (0..5)
     ///     .to_stream()
     ///     .filter(|v| *v > 2)
-    ///     .tap(|v| vec.push(*v))
+    ///     .inspect(|v| vec.push(*v))
     ///     .subscribe();
     ///
     /// assert!(vec == &[3, 4], "vec = {:?}", vec);
@@ -68,7 +68,7 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .max()
-    ///     .tap(|v| value = *v)
+    ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 9, "value = {:?}", value);
     /// ```
@@ -89,7 +89,7 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .max_by(|v| 10 - *v)
-    ///     .tap(|v| value = *v)
+    ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
@@ -110,7 +110,7 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .min()
-    ///     .tap(|v| value = *v)
+    ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
@@ -131,7 +131,7 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .min_by(|v| 10 - *v)
-    ///     .tap(|v| value = *v)
+    ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 9, "value = {:?}", value);
     /// ```

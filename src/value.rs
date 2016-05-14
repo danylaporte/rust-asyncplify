@@ -16,7 +16,7 @@ impl<T> Value<T> {
     /// use asyncplify::*;
     ///
     /// Value::new(5)
-    ///     .tap(|v| println!("{}", v))
+    ///     .inspect(|v| println!("{}", v))
     ///     .subscribe();
     /// ```
     pub fn new(value: T) -> Self {

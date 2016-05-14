@@ -13,7 +13,7 @@ use stream::*;
 /// let mut count = 0;
 ///
 /// Empty
-///     .tap(|_| count += 1)
+///     .inspect(|_| count += 1)
 ///     .subscribe();
 ///
 /// assert!(count == 0, "count = {}", count);

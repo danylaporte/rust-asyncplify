@@ -110,7 +110,7 @@ pub trait GroupByStream<T>: Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .group_by(|v| v % 2)
-    ///     .tap(|g| vec.push(g.get_key()))
+    ///     .inspect(|g| vec.push(g.get_key()))
     ///     .subscribe();
     ///
     /// // This gives 2 groups

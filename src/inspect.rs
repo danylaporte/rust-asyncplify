@@ -1,21 +1,19 @@
 use consumer::*;
 use producer::*;
-use std::marker::PhantomData;
 use std::rc::Rc;
 use stream::*;
 
-struct TapState<C, F, T> {
+struct InspectState<C, F> {
     consumer: C,
     func: F,
-    marker_t: PhantomData<T>,
 }
 
-pub struct Tap<S, F> {
+pub struct Inspect<S, F> {
     stream: S,
     func: F,
 }
 
-impl<C, F: FnMut(&mut T), T> Consumer<T> for TapState<C, F, T>
+impl<C, F, T> Consumer<T> for InspectState<C, F>
     where C: Consumer<T>,
           F: FnMut(&mut T)
 {
@@ -29,29 +27,28 @@ impl<C, F: FnMut(&mut T), T> Consumer<T> for TapState<C, F, T>
     }
 }
 
-impl<S, F, T> Stream<T> for Tap<S, F>
+impl<S, F, T> Stream<T> for Inspect<S, F>
     where S: Stream<T>,
           F: FnMut(&mut T)
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(TapState {
+        self.stream.consume(InspectState {
             consumer: consumer,
             func: self.func,
-            marker_t: PhantomData::<T>,
         });
     }
 }
 
-pub trait TappableStream<T>: Stream<T> {
-    fn tap<F>(self, func: F) -> Tap<Self, F>
+pub trait InspectStream<T>: Stream<T> {
+    fn inspect<F>(self, func: F) -> Inspect<Self, F>
         where F: FnMut(&mut T),
               Self: Sized
     {
-        Tap {
+        Inspect {
             stream: self,
             func: func,
         }
     }
 }
 
-impl<S, T> TappableStream<T> for S where S: Stream<T> {}
+impl<S, T> InspectStream<T> for S where S: Stream<T> {}

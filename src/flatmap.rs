@@ -99,7 +99,7 @@ mod tests {
     use super::*;
     use iter::*;
     use subscription::*;
-    use tap::*;
+    use inspect::*;
     use value::*;
 
     #[test]
@@ -110,7 +110,7 @@ mod tests {
         (0..4i32)
             .to_stream()
             .flatmap(|v| Value::new(v + 10))
-            .tap(|v| {
+            .inspect(|v| {
                 count += 1;
                 value += *v;
             })
