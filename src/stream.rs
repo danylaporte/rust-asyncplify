@@ -1,6 +1,7 @@
 use consumer::*;
 use count::*;
 use filter::*;
+use inspect::*;
 use max::*;
 use max_by::*;
 use min::*;
@@ -55,6 +56,15 @@ pub trait Stream<T> {
               F: FnMut(&mut T) -> bool
     {
         Filter::new(self, predicate)
+    }
+
+    /// Do something with each element of a stream, passing the value on.
+    /// This is usefull to debug an item.
+    fn inspect<F>(self, func: F) -> Inspect<Self, F>
+        where F: FnMut(&mut T),
+              Self: Sized
+    {
+        Inspect::new(self, func)
     }
 
     /// Emit the item corresponding to the maximum value.

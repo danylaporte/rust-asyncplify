@@ -98,8 +98,8 @@ impl<S, T> FlatmapStream<T> for S where S: Stream<T> {}
 mod tests {
     use super::*;
     use iter::*;
+    use stream::*;
     use subscription::*;
-    use inspect::*;
     use value::*;
 
     #[test]

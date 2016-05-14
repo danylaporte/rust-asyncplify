@@ -9,8 +9,17 @@ struct InspectState<C, F> {
 }
 
 pub struct Inspect<S, F> {
-    stream: S,
     func: F,
+    stream: S,
+}
+
+impl<S, F> Inspect<S, F> {
+    pub fn new(stream: S, func: F) -> Self {
+        Inspect {
+            func: func,
+            stream: stream,
+        }
+    }
 }
 
 impl<C, F, T> Consumer<T> for InspectState<C, F>
@@ -38,17 +47,3 @@ impl<S, F, T> Stream<T> for Inspect<S, F>
         });
     }
 }
-
-pub trait InspectStream<T>: Stream<T> {
-    fn inspect<F>(self, func: F) -> Inspect<Self, F>
-        where F: FnMut(&mut T),
-              Self: Sized
-    {
-        Inspect {
-            stream: self,
-            func: func,
-        }
-    }
-}
-
-impl<S, T> InspectStream<T> for S where S: Stream<T> {}
