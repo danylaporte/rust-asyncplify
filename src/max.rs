@@ -23,7 +23,7 @@ impl<C, T> Consumer<T> for MaxState<C, T>
 
     fn emit(&mut self, item: T) {
         if let Some(ref value) = self.value {
-            if value >= &item {
+            if value > &item {
                 return;
             }
         }

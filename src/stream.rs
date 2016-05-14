@@ -67,7 +67,8 @@ pub trait Stream<T> {
         Inspect::new(self, func)
     }
 
-    /// Emit the item corresponding to the maximum value.
+    /// Returns the maximum element of a stream.
+    /// Returns the lastest element if the comparison determines two elements to be equally maximum.
     ///
     /// # Examples
     ///
@@ -88,7 +89,8 @@ pub trait Stream<T> {
         Max::new(self)
     }
 
-    /// Emit the item corresponding to the maximum value.
+    /// Returns the element that gives the maximum value from the specified function.
+    /// Returns the lastest element if the comparison determines two elements to be equally maximum.
     ///
     /// # Examples
     ///
@@ -109,7 +111,8 @@ pub trait Stream<T> {
         MaxByKey::new(self, f)
     }
 
-    /// Emit the item corresponding to the minimum value.
+    /// Returns the minimum element of a stream.
+    /// Returns the lastest element if the comparison determines two elements to be equally minimum.
     ///
     /// # Examples
     ///
@@ -130,7 +133,8 @@ pub trait Stream<T> {
         Min::new(self)
     }
 
-    /// Emit the item corresponding to the minimum value.
+    /// Returns the element that gives the minimum value from the specified function.
+    /// Returns the lastest element if the comparison determines two elements to be equally minimum.
     ///
     /// # Examples
     ///
