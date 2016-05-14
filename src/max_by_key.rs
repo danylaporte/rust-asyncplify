@@ -6,7 +6,7 @@ use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
-struct MaxByState<C, T, F, K>
+struct MaxByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -16,7 +16,7 @@ struct MaxByState<C, T, F, K>
     value: Option<(K, T)>,
 }
 
-impl<C, T, F, K> Consumer<T> for MaxByState<C, T, F, K>
+impl<C, T, F, K> Consumer<T> for MaxByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -37,7 +37,7 @@ impl<C, T, F, K> Consumer<T> for MaxByState<C, T, F, K>
     }
 }
 
-impl<C, T, F, K> Drop for MaxByState<C, T, F, K>
+impl<C, T, F, K> Drop for MaxByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -49,19 +49,19 @@ impl<C, T, F, K> Drop for MaxByState<C, T, F, K>
     }
 }
 
-pub struct MaxBy<S, F, K> {
-    stream: S,
+pub struct MaxByKey<S, F, K> {
     f: F,
     marker_k: PhantomData<K>,
+    stream: S,
 }
 
-impl<S, T, F, K> Stream<T> for MaxBy<S, F, K>
+impl<S, T, F, K> Stream<T> for MaxByKey<S, F, K>
     where S: Stream<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(MaxByState {
+        self.stream.consume(MaxByKeyState {
             consumer: consumer,
             f: self.f,
             value: None,
@@ -69,9 +69,9 @@ impl<S, T, F, K> Stream<T> for MaxBy<S, F, K>
     }
 }
 
-impl<S, F, K> MaxBy<S, F, K> {
+impl<S, F, K> MaxByKey<S, F, K> {
     pub fn new(stream: S, f: F) -> Self {
-        MaxBy {
+        MaxByKey {
             f: f,
             marker_k: PhantomData::<K>,
             stream: stream,

@@ -6,7 +6,7 @@ use std::mem::replace;
 use std::rc::Rc;
 use stream::*;
 
-struct MinByState<C, T, F, K>
+struct MinByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -16,7 +16,7 @@ struct MinByState<C, T, F, K>
     value: Option<(K, T)>,
 }
 
-impl<C, T, F, K> Consumer<T> for MinByState<C, T, F, K>
+impl<C, T, F, K> Consumer<T> for MinByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -37,7 +37,7 @@ impl<C, T, F, K> Consumer<T> for MinByState<C, T, F, K>
     }
 }
 
-impl<C, T, F, K> Drop for MinByState<C, T, F, K>
+impl<C, T, F, K> Drop for MinByKeyState<C, T, F, K>
     where C: Consumer<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
@@ -49,19 +49,19 @@ impl<C, T, F, K> Drop for MinByState<C, T, F, K>
     }
 }
 
-pub struct MinBy<S, F, K> {
-    stream: S,
+pub struct MinByKey<S, F, K> {
     f: F,
     marker_k: PhantomData<K>,
+    stream: S,
 }
 
-impl<S, T, F, K> Stream<T> for MinBy<S, F, K>
+impl<S, T, F, K> Stream<T> for MinByKey<S, F, K>
     where S: Stream<T>,
           F: FnMut(&T) -> K,
           K: PartialOrd
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(MinByState {
+        self.stream.consume(MinByKeyState {
             consumer: consumer,
             f: self.f,
             value: None,
@@ -69,9 +69,9 @@ impl<S, T, F, K> Stream<T> for MinBy<S, F, K>
     }
 }
 
-impl<S, F, K> MinBy<S, F, K> {
+impl<S, F, K> MinByKey<S, F, K> {
     pub fn new(stream: S, f: F) -> Self {
-        MinBy {
+        MinByKey {
             f: f,
             marker_k: PhantomData::<K>,
             stream: stream,

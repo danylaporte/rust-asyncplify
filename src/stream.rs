@@ -3,9 +3,9 @@ use count::*;
 use filter::*;
 use inspect::*;
 use max::*;
-use max_by::*;
+use max_by_key::*;
 use min::*;
-use min_by::*;
+use min_by_key::*;
 use skip::*;
 use skip_last::*;
 use sum::*;
@@ -98,15 +98,15 @@ pub trait Stream<T> {
     ///
     /// (0..10)
     ///     .to_stream()
-    ///     .max_by(|v| 10 - *v)
+    ///     .max_by_key(|v| 10 - *v)
     ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
-    fn max_by<F: FnMut(&T) -> K, K>(self, f: F) -> MaxBy<Self, F, K>
+    fn max_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MaxByKey<Self, F, K>
         where Self: Sized
     {
-        MaxBy::new(self, f)
+        MaxByKey::new(self, f)
     }
 
     /// Emit the item corresponding to the minimum value.
@@ -140,15 +140,15 @@ pub trait Stream<T> {
     ///
     /// (0..10)
     ///     .to_stream()
-    ///     .min_by(|v| 10 - *v)
+    ///     .min_by_key(|v| 10 - *v)
     ///     .inspect(|v| value = *v)
     ///     .subscribe();
     /// assert!(value == 9, "value = {:?}", value);
     /// ```
-    fn min_by<F: FnMut(&T) -> K, K>(self, f: F) -> MinBy<Self, F, K>
+    fn min_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MinByKey<Self, F, K>
         where Self: Sized
     {
-        MinBy::new(self, f)
+        MinByKey::new(self, f)
     }
 
     /// Ignore the first X values from the stream
