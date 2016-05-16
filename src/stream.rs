@@ -1,16 +1,17 @@
 use consumer::*;
 use count::*;
 use filter::*;
+use group_by::*;
 use inspect::*;
-use max::*;
 use max_by_key::*;
-use min::*;
+use max::*;
 use min_by_key::*;
-use skip::*;
+use min::*;
 use skip_last::*;
+use skip::*;
 use sum::*;
-use take::*;
 use take_last::*;
+use take::*;
 
 pub trait Stream<T> {
     fn consume<C: Consumer<T>>(self, consumer: C);
@@ -56,6 +57,30 @@ pub trait Stream<T> {
               F: FnMut(&mut T) -> bool
     {
         Filter::new(self, predicate)
+    }
+
+    /// Group incoming values using a `key_selector`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut vec = Vec::new();
+    ///
+    /// (0..10)
+    ///     .to_stream()
+    ///     .group_by(|v| v % 2)
+    ///     .inspect(|g| vec.push(g.get_key()))
+    ///     .subscribe();
+    ///
+    /// // This gives 2 groups
+    /// assert!(vec == vec!(0, 1), "vec = {:?}", vec);
+    /// ```
+    fn group_by<F: FnMut(&V) -> K, K, V>(self, key_selector: F) -> GroupBy<F, K, Self, V>
+        where Self: Sized
+    {
+        GroupBy::new(self, key_selector)
     }
 
     /// Do something with each element of a stream, passing the value on.

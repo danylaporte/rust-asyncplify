@@ -1,9 +1,9 @@
 use consumer::*;
+use std::cell::RefCell;
 use std::collections::hash_map::*;
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use std::cell::RefCell;
 use stream::*;
 
 pub struct Group<K, V> {
@@ -52,13 +52,13 @@ impl<K: Clone, V> Group<K, V> {
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct GroupBy<C, F, K, V> {
+struct GroupByState<C, F, K, V> {
     consumer: C,
     hashmap: HashMap<K, Group<K, V>>,
     key_selector: F,
 }
 
-impl<C, F, K, V> Consumer<V> for GroupBy<C, F, K, V>
+impl<C, F, K, V> Consumer<V> for GroupByState<C, F, K, V>
     where C: Consumer<Group<K, V>>,
           F: FnMut(&V) -> K,
           K: Hash + Eq + Clone
@@ -68,71 +68,49 @@ impl<C, F, K, V> Consumer<V> for GroupBy<C, F, K, V>
         let consumer = &mut self.consumer;
         let mut is_available = true;
         let mut g = self.hashmap
-                           .entry(key.clone())
-                           .or_insert_with(|| {
-                               let g = Group::new(key);
-                               is_available = consumer.emit(g.clone());
-                               g
-                           });
-                           
+                        .entry(key.clone())
+                        .or_insert_with(|| {
+                            let g = Group::new(key);
+                            is_available = consumer.emit(g.clone());
+                            g
+                        });
+
         if is_available {
             g.emit(item);
         }
-        
+
         is_available
     }
 }
 
-pub struct GroupByFactory<F, K, S, V> {
+pub struct GroupBy<F, K, S, V> {
     key_selector: F,
     marker_k: PhantomData<K>,
     marker_v: PhantomData<V>,
     stream: S,
 }
 
-impl<F, K, S, V> Stream<Group<K, V>> for GroupByFactory<F, K, S, V>
+impl<F, K, S, V> GroupBy<F, K, S, V> {
+    pub fn new(stream: S, key_selector: F) -> Self {
+        GroupBy {
+            key_selector: key_selector,
+            marker_k: PhantomData::<K>,
+            marker_v: PhantomData::<V>,
+            stream: stream,
+        }
+    }
+}
+
+impl<F, K, S, V> Stream<Group<K, V>> for GroupBy<F, K, S, V>
     where F: FnMut(&V) -> K,
           K: Clone + Hash + Eq,
           S: Stream<V>
 {
     fn consume<C: Consumer<Group<K, V>>>(self, consumer: C) {
-        self.stream.consume(GroupBy {
+        self.stream.consume(GroupByState {
             consumer: consumer,
             hashmap: HashMap::new(),
             key_selector: self.key_selector,
         });
     }
 }
-
-pub trait GroupByStream<T>: Stream<T> {
-    /// Group incoming values using a `key_selector`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let mut vec = Vec::new();
-    ///
-    /// (0..10)
-    ///     .to_stream()
-    ///     .group_by(|v| v % 2)
-    ///     .inspect(|g| vec.push(g.get_key()))
-    ///     .subscribe();
-    ///
-    /// // This gives 2 groups
-    /// assert!(vec == vec!(0, 1), "vec = {:?}", vec);
-    /// ```
-    fn group_by<F: FnMut(&V) -> K, K, V>(self, key_selector: F) -> GroupByFactory<F, K, Self, V>
-        where Self: Sized
-    {
-        GroupByFactory {
-            key_selector: key_selector,
-            marker_k: PhantomData::<K>,
-            marker_v: PhantomData::<V>,
-            stream: self,
-        }
-    }
-}
-
-impl<S, T> GroupByStream<T> for S where S: Stream<T> {}
