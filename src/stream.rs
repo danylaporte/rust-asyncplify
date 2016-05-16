@@ -1,6 +1,7 @@
 use consumer::*;
 use count::*;
 use filter::*;
+use flat_map::*;
 use fold::*;
 use group_by::*;
 use inspect::*;
@@ -36,7 +37,9 @@ pub trait Stream<T> {
         Count::new(self)
     }
 
-    /// Filter a `Stream` based on a predicate `Stream`.
+    /// Creates a stream which uses a closure to determine if an element should be emitted.
+    /// The closure must return true or false. `filter()` creates a stream which calls this closure on each element. If the closure returns true, 
+    /// then the element is returned. If the closure returns false, it will try again, and call the closure on the next element, seeing if it passes the test.
     ///
     /// # Examples
     ///
@@ -59,6 +62,32 @@ pub trait Stream<T> {
     {
         Filter::new(self, predicate)
     }
+    
+    /// Creates an stream that works like map, but flattens nested structure.
+    /// The `map()` adapter is very useful, but only when the closure argument produces values. 
+    /// If it produces a stream instead, there's an extra layer of indirection. flat_map() will remove this extra layer on its own.
+    ///
+    /// Another way of thinking about flat_map(): map()'s closure returns one item for each element, and flat_map()'s closure returns a stream for each element.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..4i32)
+    ///     .to_stream()
+    ///     .flat_map(|v| Value::new(v + 10))
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
+    /// ```
+    fn flat_map<F, SO, O>(self, func: F) -> Flatmap<Self, F, T, SO, O>
+        where Self: Sized,
+              F: FnMut(T) -> SO,
+              SO: Stream<O>
+    {
+        Flatmap::new(self, func)
+    }
 
     /// A stream adaptor that applies a function, producing a single, final value.
     ///`fold()` takes two arguments: an initial value, and a closure with two arguments: an 'accumulator', and an element. 
@@ -71,7 +100,7 @@ pub trait Stream<T> {
 
     /// Folding is useful whenever you have a collection of something, and want to produce a single value from it.
     ///
-    /// # Basic example
+    /// # Examples
     ///
     /// ```
     /// use asyncplify::*;

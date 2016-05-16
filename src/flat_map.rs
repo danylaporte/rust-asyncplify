@@ -62,6 +62,18 @@ pub struct Flatmap<S, F, I, SO, O> {
     stream: S,
 }
 
+impl<S, F, I, SO, O> Flatmap<S, F, I, SO, O> {
+    pub fn new(stream: S, func: F) -> Self {
+        Flatmap {
+            func: func,
+            marker_i: PhantomData::<I>,
+            marker_o: PhantomData::<O>,
+            marker_so: PhantomData::<SO>,
+            stream: stream,
+        }
+    }
+}
+
 impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
     where S: Stream<I>,
           F: FnMut(I) -> SO,
@@ -77,50 +89,5 @@ impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
             marker_i: PhantomData::<I>,
             marker_s: PhantomData::<SO>,
         });
-    }
-}
-
-pub trait FlatmapStream<I>: Stream<I> {
-    fn flatmap<F, SO, O>(self, func: F) -> Flatmap<Self, F, I, SO, O>
-        where Self: Sized,
-              F: FnMut(I) -> SO,
-              SO: Stream<O>
-    {
-        Flatmap {
-            func: func,
-            marker_i: PhantomData::<I>,
-            marker_o: PhantomData::<O>,
-            marker_so: PhantomData::<SO>,
-            stream: self,
-        }
-    }
-}
-
-impl<S, T> FlatmapStream<T> for S where S: Stream<T> {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use iter::*;
-    use stream::*;
-    use subscription::*;
-    use value::*;
-
-    #[test]
-    fn it_works() {
-        let mut count = 0i32;
-        let mut value = 0i32;
-
-        (0..4i32)
-            .to_stream()
-            .flatmap(|v| Value::new(v + 10))
-            .inspect(|v| {
-                count += 1;
-                value += *v;
-            })
-            .subscribe();
-
-        assert!(count == 4, "count = {}", count);
-        assert!(value == 10 + 11 + 12 + 13, "value = {}", value);
     }
 }
