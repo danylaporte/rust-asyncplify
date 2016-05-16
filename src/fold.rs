@@ -41,6 +41,17 @@ pub struct Fold<S, I, F, O> {
     stream: S,
 }
 
+impl<S, I, F, O> Fold<S, I, F, O> {
+    pub fn new(stream: S, initial: O, func: F) -> Self {
+        Fold {
+            stream: stream,
+            initial: initial,
+            func: func,
+            marker_i: PhantomData::<I>,
+        }
+    }
+}
+
 impl<S, I, F, O> Stream<O> for Fold<S, I, F, O>
     where S: Stream<I>,
           F: FnMut(O, I) -> O
@@ -54,19 +65,3 @@ impl<S, I, F, O> Stream<O> for Fold<S, I, F, O>
         });
     }
 }
-
-pub trait FoldableStream<I>: Stream<I> {
-    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, I, F, O>
-        where Self: Sized,
-              F: FnMut(O, I) -> O
-    {
-        Fold {
-            stream: self,
-            initial: initial,
-            func: func,
-            marker_i: PhantomData::<I>,
-        }
-    }
-}
-
-impl<T, S> FoldableStream<T> for S where S: Stream<T> {}

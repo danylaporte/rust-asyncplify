@@ -51,7 +51,6 @@ impl<K: Clone, V> Group<K, V> {
     }
 }
 
-#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 struct GroupByState<C, F, K, V> {
     consumer: C,
     hashmap: HashMap<K, Group<K, V>>,
@@ -83,6 +82,7 @@ impl<C, F, K, V> Consumer<V> for GroupByState<C, F, K, V>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct GroupBy<F, K, S, V> {
     key_selector: F,
     marker_k: PhantomData<K>,

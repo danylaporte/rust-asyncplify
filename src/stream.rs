@@ -1,6 +1,7 @@
 use consumer::*;
 use count::*;
 use filter::*;
+use fold::*;
 use group_by::*;
 use inspect::*;
 use max_by_key::*;
@@ -57,6 +58,38 @@ pub trait Stream<T> {
               F: FnMut(&mut T) -> bool
     {
         Filter::new(self, predicate)
+    }
+
+    /// A stream adaptor that applies a function, producing a single, final value.
+    ///`fold()` takes two arguments: an initial value, and a closure with two arguments: an 'accumulator', and an element. 
+    /// It returns the value that the accumulator should have for the next iteration.
+    ///
+    /// The initial value is the value the accumulator will have on the first call.
+    /// After applying this closure to every element of the iterator, `fold()` returns the accumulator.
+    ///
+    /// This operation is sometimes called 'reduce' or 'inject'.
+
+    /// Folding is useful whenever you have a collection of something, and want to produce a single value from it.
+    ///
+    /// # Basic example
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// let mut v = 0;
+    ///
+    /// (0..10)
+    ///     .to_stream()
+    ///     .fold(0, |o, i| o + i)
+    ///     .inspect(|x| v = *x)
+    ///     .subscribe();
+    ///
+    /// assert!(v == 45, "v = {}", v);
+    /// ```
+    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, T, F, O>
+        where Self: Sized,
+              F: FnMut(O, T) -> O
+    {
+        Fold::new(self, initial, func)
     }
 
     /// Group incoming values using a `key_selector`.
