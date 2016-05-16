@@ -1,35 +1,23 @@
 use consumer::*;
-use std::marker::PhantomData;
-use stream::*;
 
 /// Represents a subscription to a `Stream`
-pub struct Subscription<I> {
+pub struct Subscription {
     closed: bool,
-    marker: PhantomData<I>,
 }
 
-impl<I> Subscription<I> {
-    /// Closes the `Subscription<I>`
+impl Subscription {
+    /// Closes the `Subscription`
     pub fn close(mut self) {
         self.closed = true;
     }
+
+    pub fn new() -> Self {
+        Subscription { closed: false }
+    }
 }
 
-impl<T> Consumer<T> for Subscription<T> {
+impl<T> Consumer<T> for Subscription {
     fn emit(&mut self, _: T) -> bool {
         !self.closed
     }
 }
-
-pub trait SubscribableStream<T>: Stream<T> {
-    fn subscribe(self)
-        where Self: Sized
-    {
-        self.consume(Subscription {
-            closed: false,
-            marker: PhantomData::<T>,
-        });
-    }
-}
-
-impl<S, T> SubscribableStream<T> for S where S: Stream<T> {}
