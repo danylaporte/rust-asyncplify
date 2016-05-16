@@ -1,31 +1,24 @@
 use consumer::*;
-use producer::*;
 use std::marker::PhantomData;
-use std::mem;
-use std::option::*;
-use std::rc::Rc;
 use stream::*;
 
 /// Represents a subscription to a `Stream`
 pub struct Subscription<I> {
-    producer: Option<Rc<Producer>>,
+    closed: bool,
     marker: PhantomData<I>,
 }
 
 impl<I> Subscription<I> {
     /// Closes the `Subscription<I>`
     pub fn close(mut self) {
-        if let Some(p) = mem::replace(&mut self.producer, None) {
-            p.close();
-        }
+        self.closed = true;
     }
 }
 
 impl<T> Consumer<T> for Subscription<T> {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.producer = Some(producer);
+    fn emit(&mut self, _: T) -> bool {
+        !self.closed
     }
-    fn emit(&mut self, _: T) {}
 }
 
 pub trait SubscribableStream<T>: Stream<T> {
@@ -33,7 +26,7 @@ pub trait SubscribableStream<T>: Stream<T> {
         where Self: Sized
     {
         self.consume(Subscription {
-            producer: None,
+            closed: false,
             marker: PhantomData::<T>,
         });
     }

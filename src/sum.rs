@@ -1,8 +1,6 @@
 use consumer::*;
-use producer::*;
 use std::mem::replace;
 use std::ops::AddAssign;
-use std::rc::Rc;
 use stream::*;
 
 struct SumState<C, T>
@@ -17,12 +15,9 @@ impl<C, T> Consumer<T> for SumState<C, T>
     where C: Consumer<T>,
           T: AddAssign + Default
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         self.value += item;
+        true
     }
 }
 

@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
@@ -27,12 +25,6 @@ impl<T> Value<T> {
 
 impl<T> Stream<T> for Value<T> {
     fn consume<C: Consumer<T>>(self, mut consumer: C) {
-        let producer = Rc::new(Producer::new());
-
-        consumer.init(producer.clone());
-
-        if !producer.is_closed() {
-            consumer.emit(self.value);
-        }
+        consumer.emit(self.value);
     }
 }

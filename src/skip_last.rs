@@ -1,7 +1,5 @@
 use consumer::*;
-use producer::*;
 use std::collections::VecDeque;
-use std::rc::Rc;
 use stream::*;
 
 struct SkipLastState<C, T>
@@ -21,17 +19,16 @@ pub struct SkipLast<S> {
 impl<C, T> Consumer<T> for SkipLastState<C, T>
     where C: Consumer<T>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         if self.count == self.queue.len() {
             if let Some(old_item) = self.queue.pop_back() {
-                self.consumer.emit(old_item);
+                if !self.consumer.emit(old_item) {
+                    return false;
+                }
             }
         }
         self.queue.push_front(item);
+        true
     }
 }
 

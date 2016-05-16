@@ -1,7 +1,5 @@
 use consumer::*;
-use producer::*;
 use std::marker::PhantomData;
-use std::rc::Rc;
 use stream::*;
 
 struct MapState<C, F, I, O> {
@@ -23,12 +21,8 @@ impl<C, F, I, O> Consumer<I> for MapState<C, F, I, O>
     where C: Consumer<O>,
           F: FnMut(I) -> O
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: I) {
-        self.consumer.emit((self.func)(item));
+    fn emit(&mut self, item: I) -> bool {
+        self.consumer.emit((self.func)(item))
     }
 }
 

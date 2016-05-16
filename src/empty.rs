@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 /// Constructs a new empty `Stream` based on a `Empty`.
@@ -22,7 +20,5 @@ use stream::*;
 pub struct Empty;
 
 impl Stream<()> for Empty {
-    fn consume<C: Consumer<()>>(self, mut consumer: C) {
-        consumer.init(Rc::new(Producer::new()));
-    }
+    fn consume<C: Consumer<()>>(self, _: C) {}
 }

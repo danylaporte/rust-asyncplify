@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 struct SkipState<C> {
@@ -17,15 +15,12 @@ pub struct Skip<S> {
 impl<C, T> Consumer<T> for SkipState<C>
     where C: Consumer<T>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         if self.count > 0 {
             self.count -= 1;
+            true
         } else {
-            self.consumer.emit(item);
+            self.consumer.emit(item)
         }
     }
 }

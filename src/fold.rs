@@ -1,8 +1,6 @@
 use consumer::*;
-use producer::*;
 use std::marker::PhantomData;
 use std::mem::replace;
-use std::rc::Rc;
 use stream::*;
 
 struct FoldState<C, F, I, O>
@@ -18,13 +16,10 @@ impl<C, F, I, O> Consumer<I> for FoldState<C, F, I, O>
     where C: Consumer<O>,
           F: FnMut(O, I) -> O
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: I) {
+    fn emit(&mut self, item: I) -> bool {
         let v = replace(&mut self.value, None).unwrap();
         self.value = Some((self.func)(v, item));
+        true
     }
 }
 

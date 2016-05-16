@@ -1,9 +1,7 @@
 use consumer::*;
-use producer::*;
 use std::cmp::PartialOrd;
 use std::marker::PhantomData;
 use std::mem::replace;
-use std::rc::Rc;
 use stream::*;
 
 struct MaxByKeyState<C, T, F, K>
@@ -21,19 +19,16 @@ impl<C, T, F, K> Consumer<T> for MaxByKeyState<C, T, F, K>
           F: FnMut(&T) -> K,
           K: PartialOrd
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         let k = (self.f)(&item);
         if let Some(ref value) = self.value {
             if value.0 > k {
-                return;
+                return true;
             }
         }
 
         self.value = Some((k, item));
+        true
     }
 }
 

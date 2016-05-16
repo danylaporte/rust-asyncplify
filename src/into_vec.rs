@@ -1,12 +1,10 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 impl<'a, T> Consumer<T> for &'a mut Vec<T> {
-    fn init(&mut self, _: Rc<Producer>) {}
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         self.push(item);
+        true
     }
 }
 

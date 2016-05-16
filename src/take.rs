@@ -1,13 +1,9 @@
 use consumer::*;
-use producer::*;
-use std::mem::replace;
-use std::rc::Rc;
 use stream::*;
 
 struct TakeState<C> {
     consumer: C,
     count: u64,
-    producer: Option<Rc<Producer>>,
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
@@ -19,21 +15,12 @@ pub struct Take<S> {
 impl<C, T> Consumer<T> for TakeState<C>
     where C: Consumer<T>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.producer = Some(producer.clone());
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         if self.count > 0 {
             self.count -= 1;
-            self.consumer.emit(item);
-
-            if self.count == 0 {
-                if let Some(p) = replace(&mut self.producer, None) {
-                    p.close();
-                }
-            }
+            self.consumer.emit(item) && self.count > 0
+        } else {
+            false
         }
     }
 }
@@ -45,7 +32,6 @@ impl<S, T> Stream<T> for Take<S>
         self.stream.consume(TakeState {
             consumer: consumer,
             count: self.count,
-            producer: None,
         });
     }
 }

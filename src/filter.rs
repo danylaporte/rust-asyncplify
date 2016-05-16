@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 struct FilterState<C, F> {
@@ -12,13 +10,11 @@ impl<C, F, T> Consumer<T> for FilterState<C, F>
     where C: Consumer<T>,
           F: FnMut(&mut T) -> bool
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, mut item: T) {
+    fn emit(&mut self, mut item: T) -> bool {
         if (self.predicate)(&mut item) {
-            self.consumer.emit(item);
+            self.consumer.emit(item)
+        } else {
+            true
         }
     }
 }

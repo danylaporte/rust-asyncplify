@@ -1,8 +1,6 @@
 use consumer::*;
-use producer::*;
 use std::cmp::PartialOrd;
 use std::mem::replace;
-use std::rc::Rc;
 use stream::*;
 
 struct MinState<C, T>
@@ -17,18 +15,15 @@ impl<C, T> Consumer<T> for MinState<C, T>
     where C: Consumer<T>,
           T: PartialOrd
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         if let Some(ref value) = self.value {
             if value < &item {
-                return;
+                return true;
             }
         }
 
         self.value = Some(item);
+        true
     }
 }
 

@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 /// Represent a stream on an iterator.
@@ -13,18 +11,9 @@ impl<I, T> Stream<T> for IterStream<I>
     where I: Iterator<Item = T>
 {
     fn consume<C: Consumer<T>>(self, mut consumer: C) {
-        let producer = Rc::new(Producer::new());
-
-        consumer.init(producer.clone());
-
-        if producer.is_closed() {
-            return;
-        }
-
         for i in self.iterator {
-            consumer.emit(i);
-            if producer.is_closed() {
-                return;
+            if !consumer.emit(i) {
+                break;
             }
         }
     }

@@ -1,5 +1,4 @@
 use consumer::*;
-use producer::*;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -19,34 +18,38 @@ impl<C, F, I, O, S> Consumer<I> for FlatmapState<C, F, I, O, S>
           F: FnMut(I) -> S,
           S: Stream<O>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        if let Some(ref cell) = self.child.consumer {
-            cell.borrow_mut().init(producer);
+    fn emit(&mut self, item: I) -> bool {
+        if self.child.consumer.borrow().is_none() {
+            return false;
         }
-    }
-
-    fn emit(&mut self, item: I) {
+        
         let stream = (self.func)(item);
         stream.consume(self.child.clone());
+        self.child.consumer.borrow().is_some()
     }
 }
 
 struct Child<C, O>
     where C: Consumer<O>
 {
-    consumer: Option<RefCell<C>>,
+    consumer: RefCell<Option<C>>,
     marker_o: PhantomData<O>,
 }
 
 impl<C, O> Consumer<O> for Rc<Child<C, O>>
     where C: Consumer<O>
 {
-    fn init(&mut self, _: Rc<Producer>) {}
-
-    fn emit(&mut self, item: O) {
-        if let Some(ref cell) = self.consumer {
-            cell.borrow_mut().emit(item);
+    fn emit(&mut self, item: O) -> bool {
+        let mut consumer_ref = self.consumer.borrow_mut();
+        
+        if let Some(ref mut consumer) = *consumer_ref {
+            if consumer.emit(item) {
+                return true;
+            }
         }
+        
+        *consumer_ref = None;
+        false
     }
 }
 
@@ -67,7 +70,7 @@ impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO, O>
     fn consume<C: Consumer<O>>(self, consumer: C) {
         self.stream.consume(FlatmapState {
             child: Rc::new(Child {
-                consumer: Some(RefCell::new(consumer)),
+                consumer: RefCell::new(Some(consumer)),
                 marker_o: PhantomData::<O>,
             }),
             func: self.func,

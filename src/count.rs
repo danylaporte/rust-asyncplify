@@ -1,7 +1,5 @@
 use consumer::*;
-use producer::*;
 use std::marker::PhantomData;
-use std::rc::Rc;
 use stream::*;
 
 struct CountState<C>
@@ -14,12 +12,9 @@ struct CountState<C>
 impl<C, T> Consumer<T> for CountState<C>
     where C: Consumer<u64>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, _: T) {
+    fn emit(&mut self, _: T) -> bool {
         self.value += 1;
+        true
     }
 }
 

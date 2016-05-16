@@ -1,7 +1,5 @@
 use consumer::*;
-use producer::*;
 use std::mem::replace;
-use std::rc::Rc;
 use stream::*;
 
 struct ToVecState<C, F, T>
@@ -32,16 +30,14 @@ impl<C, F, T> Consumer<T> for ToVecState<C, F, T>
     where C: Consumer<Vec<T>>,
           F: FnMut(&Vec<T>) -> bool
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         self.vec.push(item);
 
         if (self.splitter)(&self.vec) {
             let vec = replace(&mut self.vec, Vec::new());
-            self.consumer.emit(vec);
+            self.consumer.emit(vec)
+        } else {
+            true
         }
     }
 }

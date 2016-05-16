@@ -1,7 +1,5 @@
 use consumer::*;
-use producer::*;
 use std::collections::VecDeque;
-use std::rc::Rc;
 use stream::*;
 
 struct TakeLastState<C, T>
@@ -9,7 +7,6 @@ struct TakeLastState<C, T>
 {
     consumer: C,
     count: usize,
-    producer: Option<Rc<Producer>>,
     queue: VecDeque<T>,
 }
 
@@ -22,16 +19,12 @@ pub struct TakeLast<S> {
 impl<C, T> Consumer<T> for TakeLastState<C, T>
     where C: Consumer<T>
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.producer = Some(producer.clone());
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: T) {
+    fn emit(&mut self, item: T) -> bool {
         if self.count == self.queue.len() {
             self.queue.pop_front();
         }
         self.queue.push_back(item);
+        true
     }
 }
 
@@ -39,11 +32,9 @@ impl<C, T> Drop for TakeLastState<C, T>
     where C: Consumer<T>
 {
     fn drop(&mut self) {
-        if let Some(ref producer) = self.producer {
-            for i in self.queue.drain(..) {
-                if !producer.is_closed() {
-                    self.consumer.emit(i);
-                }
+        for i in self.queue.drain(..) {
+            if !self.consumer.emit(i) {
+                break;
             }
         }
     }
@@ -59,7 +50,6 @@ impl<S, T> Stream<T> for TakeLast<S>
             self.stream.consume(TakeLastState {
                 consumer: consumer,
                 count: self.count,
-                producer: None,
                 queue: VecDeque::new(),
             });
         }

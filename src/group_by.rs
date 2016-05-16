@@ -1,5 +1,4 @@
 use consumer::*;
-use producer::*;
 use std::collections::hash_map::*;
 use std::hash::Hash;
 use std::marker::PhantomData;
@@ -33,15 +32,21 @@ impl<K: Clone, V> Group<K, V> {
     }
 
     fn emit(&mut self, item: V) {
-        if let Some(ref mut consumer) = *self.consumer.borrow_mut() {
-           consumer.emit(item);
+        let mut consumer_ref = self.consumer.borrow_mut();
+        {
+            if let Some(ref mut consumer) = *consumer_ref {
+                if consumer.emit(item) {
+                    return;
+                }
+            }
         }
+        *consumer_ref = None;
     }
-    
+
     fn clone(&self) -> Self {
         Group {
             consumer: self.consumer.clone(),
-            key: self.key.clone(), 
+            key: self.key.clone(),
         }
     }
 }
@@ -58,22 +63,23 @@ impl<C, F, K, V> Consumer<V> for GroupBy<C, F, K, V>
           F: FnMut(&V) -> K,
           K: Hash + Eq + Clone
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, item: V) {
+    fn emit(&mut self, item: V) -> bool {
         let key = (self.key_selector)(&item);
         let consumer = &mut self.consumer;
-        let group = self.hashmap
-                        .entry(key.clone())
-                        .or_insert_with(|| {
-                            let g = Group::new(key);
-                            consumer.emit(g.clone());
-                            g
-                        });
-
-        group.emit(item);
+        let mut is_available = true;
+        let mut g = self.hashmap
+                           .entry(key.clone())
+                           .or_insert_with(|| {
+                               let g = Group::new(key);
+                               is_available = consumer.emit(g.clone());
+                               g
+                           });
+                           
+        if is_available {
+            g.emit(item);
+        }
+        
+        is_available
     }
 }
 

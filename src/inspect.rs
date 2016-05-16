@@ -1,6 +1,4 @@
 use consumer::*;
-use producer::*;
-use std::rc::Rc;
 use stream::*;
 
 struct InspectState<C, F> {
@@ -27,13 +25,9 @@ impl<C, F, T> Consumer<T> for InspectState<C, F>
     where C: Consumer<T>,
           F: FnMut(&mut T)
 {
-    fn init(&mut self, producer: Rc<Producer>) {
-        self.consumer.init(producer);
-    }
-
-    fn emit(&mut self, mut item: T) {
+    fn emit(&mut self, mut item: T) -> bool {
         (self.func)(&mut item);
-        self.consumer.emit(item);
+        self.consumer.emit(item)
     }
 }
 
