@@ -16,6 +16,7 @@ use subscription::*;
 use sum::*;
 use take_last::*;
 use take::*;
+use zip::*;
 
 pub trait Stream<T> {
     fn consume<C: Consumer<T>>(self, consumer: C);
@@ -371,5 +372,27 @@ pub trait Stream<T> {
         where Self: Sized
     {
         TakeLast::new(self, count)
+    }
+
+    /// 'Zips up' two streams into a single stream of pairs.
+    /// `zip()` returns a new stream that will iterate over two other streams, returning a tuple where the first element comes from the first stream,
+    /// and the second element comes from the second stream.
+    ///
+    /// In other words, it zips two stream together, into a single one.
+    ///
+    /// # Examples
+    /// 
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let right = (4..6).to_stream();
+    ///
+    /// let vec = (0..4).to_stream().zip(right).into_vec();
+    /// assert!(vec == [(0, 4),(1, 5)], "vec == {:?}", vec);
+    /// ```
+    fn zip<R>(self, right: R) -> Zip<Self, R>
+        where Self: Sized
+    {
+        Zip::new(self, right)
     }
 }

@@ -22,6 +22,7 @@ mod take_last;
 mod take;
 mod to_vec;
 mod value;
+mod zip;
 
 pub use consumer::*;
 pub use count::*;
@@ -47,6 +48,7 @@ pub use take_last::*;
 pub use take::*;
 pub use to_vec::*;
 pub use value::*;
+pub use zip::*;
 
 #[cfg(test)]
 mod tests {
