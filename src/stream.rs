@@ -67,7 +67,7 @@ pub trait Stream<T> {
 
     /// Creates an stream that works like map, but flattens nested structure.
     /// The `map()` adapter is very useful, but only when the closure argument produces values. 
-    /// If it produces a stream instead, there's an extra layer of indirection. flat_map() will remove this extra layer on its own.    /// If it produces a stream instead, there's an extra layer of indirection. flat_map() will remove this extra layer on its own.
+    /// If it produces a stream instead, there's an extra layer of indirection. flat_map() will remove this extra layer on its own.
     ///
     /// Another way of thinking about flat_map(): map()'s closure returns one item for each element, and flat_map()'s closure returns a stream for each element.
     ///
