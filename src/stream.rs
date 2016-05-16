@@ -318,7 +318,9 @@ pub trait Stream<T> {
         self.consume(Subscription::new());
     }
 
-    /// Calculate the sum of the item received.
+    /// Sums the elements of a stream.
+    /// Takes each element, adds them together, and returns the result.
+    /// An empty stream returns the zero value of the type.
     ///
     /// # Examples
     ///
