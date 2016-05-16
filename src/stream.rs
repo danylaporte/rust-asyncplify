@@ -5,6 +5,7 @@ use flat_map::*;
 use fold::*;
 use group_by::*;
 use inspect::*;
+use map::*;
 use max_by_key::*;
 use max::*;
 use min_by_key::*;
@@ -153,6 +154,35 @@ pub trait Stream<T> {
               Self: Sized
     {
         Inspect::new(self, func)
+    }
+
+    /// Takes a closure and creates a stream which calls that closure on each element.
+    /// `map()` transforms one stream into another, by means of its argument: something that implements FnMut. It produces a new stream which calls this closure 
+    /// on each element of the original stream.
+    ///
+    /// If you are good at thinking in types, you can think of map() like this: If you have a stream that gives you elements of some type A, and you want a stream
+    /// of some other type B, you can use `map()`, passing a closure that takes an A and returns a B.
+    /// `map()` is conceptually similar to a for loop. However, as `map()` is lazy, it is best used when you're already working with other streams. If you're doing
+    /// some sort of looping for a side effect, it's considered more idiomatic to use for than `map()`.`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut value = 0;
+    ///
+    /// let vec = (0..4)
+    ///     .to_stream()
+    ///     .map(|v| v + 10)
+    ///     .into_vec();
+    /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
+    /// ```
+    fn map<O, F>(self, func: F) -> Map<Self, F, T, O>
+        where Self: Sized,
+              F: FnMut(T) -> O
+    {
+        Map::new(self, func)
     }
 
     /// Returns the maximum element of a stream.
