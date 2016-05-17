@@ -1,5 +1,6 @@
 use consumer::*;
 use count::*;
+use distinct::*;
 use filter::*;
 use flat_map::*;
 use fold::*;
@@ -39,6 +40,28 @@ pub trait Stream<T> {
         where Self: Sized
     {
         Count::new(self)
+    }
+
+    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = [0, 1, 1, 0, 2, 3]
+    ///     .into_iter()
+    ///     .map(|i| *i)
+    ///     .to_stream()
+    ///     .distinct()
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```     
+    fn distinct(self) -> Distinct<Self>
+        where Self: Sized
+    {
+        Distinct::new(self)
     }
 
     /// Creates a stream which uses a closure to determine if an element should be emitted.

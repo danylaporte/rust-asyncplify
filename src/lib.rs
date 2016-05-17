@@ -1,6 +1,7 @@
 mod consumer;
 mod count;
 mod empty;
+mod distinct;
 mod filter;
 mod flat_map;
 mod fold;
@@ -27,6 +28,7 @@ mod zip;
 
 pub use consumer::*;
 pub use count::*;
+pub use distinct::*;
 pub use empty::*;
 pub use filter::*;
 pub use flat_map::*;
