@@ -24,6 +24,7 @@ mod take_last;
 mod take;
 mod to_vec;
 mod unique;
+mod unique_by_key;
 mod value;
 mod zip;
 
@@ -53,6 +54,7 @@ pub use take_last::*;
 pub use take::*;
 pub use to_vec::*;
 pub use unique::*;
+pub use unique_by_key::*;
 pub use value::*;
 pub use zip::*;
 

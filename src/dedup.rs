@@ -33,7 +33,7 @@ impl<C, T> Consumer<T> for DedupState<C, T>
                 return true;
             }
         }
-        
+
         self.last = Some(item.clone());
         self.consumer.emit(item)
     }

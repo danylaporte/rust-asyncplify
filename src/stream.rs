@@ -19,6 +19,7 @@ use sum::*;
 use take_last::*;
 use take::*;
 use unique::*;
+use unique_by_key::*;
 use zip::*;
 
 pub trait Stream<T> {
@@ -448,6 +449,29 @@ pub trait Stream<T> {
         where Self: Sized
     {
         Unique::new(self)
+    }
+
+    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = [0, 1, 0, 1, 0, 2, 3]
+    ///     .into_iter()
+    ///     .map(|i| *i)
+    ///     .to_stream()
+    ///     .unique_by_key(|v| *v)
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```     
+    fn unique_by_key<F, K>(self, key_selector: F) -> UniqueByKey<Self, F, K>
+        where Self: Sized,
+              F: FnMut(&T) -> K
+    {
+        UniqueByKey::new(self, key_selector)
     }
 
     /// 'Zips up' two streams into a single stream of pairs.
