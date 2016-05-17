@@ -1,7 +1,6 @@
 mod consumer;
 mod count;
 mod empty;
-mod distinct;
 mod filter;
 mod flat_map;
 mod fold;
@@ -23,12 +22,12 @@ mod sum;
 mod take_last;
 mod take;
 mod to_vec;
+mod unique;
 mod value;
 mod zip;
 
 pub use consumer::*;
 pub use count::*;
-pub use distinct::*;
 pub use empty::*;
 pub use filter::*;
 pub use flat_map::*;
@@ -51,6 +50,7 @@ pub use sum::*;
 pub use take_last::*;
 pub use take::*;
 pub use to_vec::*;
+pub use unique::*;
 pub use value::*;
 pub use zip::*;
 

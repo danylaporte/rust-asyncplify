@@ -1,6 +1,5 @@
 use consumer::*;
 use count::*;
-use distinct::*;
 use filter::*;
 use flat_map::*;
 use fold::*;
@@ -18,6 +17,7 @@ use subscription::*;
 use sum::*;
 use take_last::*;
 use take::*;
+use unique::*;
 use zip::*;
 
 pub trait Stream<T> {
@@ -53,15 +53,15 @@ pub trait Stream<T> {
     ///     .into_iter()
     ///     .map(|i| *i)
     ///     .to_stream()
-    ///     .distinct()
+    ///     .unique()
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
     /// ```     
-    fn distinct(self) -> Distinct<Self>
+    fn unique(self) -> Unique<Self>
         where Self: Sized
     {
-        Distinct::new(self)
+        Unique::new(self)
     }
 
     /// Creates a stream which uses a closure to determine if an element should be emitted.

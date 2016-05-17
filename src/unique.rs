@@ -4,28 +4,28 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use stream::*;
 
-pub struct Distinct<S> {
+pub struct Unique<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Distinct<S>
+impl<S, T> Stream<T> for Unique<S>
     where S: Stream<T>,
           T: Clone + Eq + Hash
 {
     fn consume<C: Consumer<T>>(self, consumer: C) {
-        self.stream.consume(DistinctState {
+        self.stream.consume(UniqueState {
             consumer: consumer,
             hashset: HashSet::new(),
         })
     }
 }
 
-struct DistinctState<C, T> {
+struct UniqueState<C, T> {
     consumer: C,
     hashset: HashSet<T>,
 }
 
-impl<C, T> Consumer<T> for DistinctState<C, T>
+impl<C, T> Consumer<T> for UniqueState<C, T>
     where C: Consumer<T>,
           T: Clone + Eq + Hash
 {
@@ -34,8 +34,8 @@ impl<C, T> Consumer<T> for DistinctState<C, T>
     }
 }
 
-impl<S> Distinct<S> {
+impl<S> Unique<S> {
     pub fn new(stream: S) -> Self {
-        Distinct { stream: stream }
+        Unique { stream: stream }
     }
 }
