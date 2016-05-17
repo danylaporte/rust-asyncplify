@@ -10,6 +10,7 @@ use max_by_key::*;
 use max::*;
 use min_by_key::*;
 use min::*;
+use scan::*;
 use skip_last::*;
 use skip::*;
 use subscription::*;
@@ -272,6 +273,33 @@ pub trait Stream<T> {
         where Self: Sized
     {
         MinByKey::new(self, f)
+    }
+
+    /// A stream adaptor similar to `fold()` that holds internal state and produces a new stream.
+    /// `scan()` takes two arguments: an initial value which seeds the internal state, and a closure with two arguments, 
+    /// the first being a mutable reference to the internal state and the second an stream element. The closure can assign 
+    /// to the internal state to share state between iterations.
+
+    /// On iteration, the closure will be applied to each element of the stream and the return value from the closure, an Option, is emitted by the stream.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..6)
+    ///     .to_stream()
+    ///     .scan(0, |o, i| o + i)
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [0, 1, 3, 6, 10, 15], "vec = {:?}", vec);
+    /// ```
+    fn scan<O, F>(self, initial: O, func: F) -> Scan<Self, T, F, O>
+        where Self: Sized,
+              F: FnMut(O, T) -> O,
+              O: Clone
+    {
+        Scan::new(self, initial, func)
     }
 
     /// Ignore the first X values from the stream
