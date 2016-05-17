@@ -1,5 +1,6 @@
 mod consumer;
 mod count;
+mod dedup;
 mod empty;
 mod filter;
 mod flat_map;
@@ -28,6 +29,7 @@ mod zip;
 
 pub use consumer::*;
 pub use count::*;
+pub use dedup::*;
 pub use empty::*;
 pub use filter::*;
 pub use flat_map::*;

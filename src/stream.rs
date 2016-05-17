@@ -1,5 +1,6 @@
 use consumer::*;
 use count::*;
+use dedup::*;
 use filter::*;
 use flat_map::*;
 use fold::*;
@@ -42,26 +43,26 @@ pub trait Stream<T> {
         Count::new(self)
     }
 
-    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    /// Creates a stream that emit only immediate new elements.
     ///
     /// # Examples
     ///
     /// ```
     /// use asyncplify::*;
     ///
-    /// let vec = [0, 1, 1, 0, 2, 3]
+    /// let vec = [0, 1, 1, 2, 2, 3]
     ///     .into_iter()
     ///     .map(|i| *i)
     ///     .to_stream()
-    ///     .unique()
+    ///     .dedup()
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
-    /// ```     
-    fn unique(self) -> Unique<Self>
+    /// ```
+    fn dedup(self) -> Dedup<Self>
         where Self: Sized
     {
-        Unique::new(self)
+        Dedup::new(self)
     }
 
     /// Creates a stream which uses a closure to determine if an element should be emitted.
@@ -425,6 +426,28 @@ pub trait Stream<T> {
         where Self: Sized
     {
         TakeLast::new(self, count)
+    }
+
+    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = [0, 1, 0, 1, 0, 2, 3]
+    ///     .into_iter()
+    ///     .map(|i| *i)
+    ///     .to_stream()
+    ///     .unique()
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```     
+    fn unique(self) -> Unique<Self>
+        where Self: Sized
+    {
+        Unique::new(self)
     }
 
     /// 'Zips up' two streams into a single stream of pairs.
