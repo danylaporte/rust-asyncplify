@@ -26,7 +26,7 @@ use zip::*;
 pub trait Stream<T> {
     fn consume<C: Consumer<T>>(self, consumer: C);
 
-    /// Count the number ofthe item received.
+    /// Count the number of items received.
     ///
     /// # Examples
     ///

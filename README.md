@@ -3,11 +3,25 @@
 # asyncplify
 Functional Reactive Programming library (RX like) for [Rust](https://github.com/rust-lang/rust)
 
-## Not ready for production yet
-This is a work in progress and research project right now. Please consider this lib in alpha stage.
+## Roadmap
+This can almost be considered an alpha version.
+
+I am working on integrating more operators and adaptors such as:
+
+- Sorting
+- Merging, combine, combine, join (only zip done for now)
+- Subjects, sharing of stream
+- Schedulers, multi-threading
+- Retrying and abort streaming
+
 
 ## Documentation
 [Reference](http://danylaporte.github.io/rust-asyncplify)
+
+[RxMarbles](http://rxmarbles.com/)
+
+[Rx Operators](http://reactivex.io/documentation/operators.html)
+
 
 ## Usage
 
@@ -25,7 +39,7 @@ fn main() {
         .inspect(|v| println!("the sum is {}", *v)) // print the sum
         .subscribe();       // subscribe to the stream, similar to collect
 }
-``` 
+```
 
 ##License
 The MIT License (MIT)
