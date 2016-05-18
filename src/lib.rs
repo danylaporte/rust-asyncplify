@@ -1,5 +1,6 @@
 mod consumer;
 mod count;
+mod dedup_by_key;
 mod dedup;
 mod empty;
 mod filter;
@@ -23,13 +24,14 @@ mod sum;
 mod take_last;
 mod take;
 mod to_vec;
-mod unique;
 mod unique_by_key;
+mod unique;
 mod value;
 mod zip;
 
 pub use consumer::*;
 pub use count::*;
+pub use dedup_by_key::*;
 pub use dedup::*;
 pub use empty::*;
 pub use filter::*;
@@ -53,8 +55,8 @@ pub use sum::*;
 pub use take_last::*;
 pub use take::*;
 pub use to_vec::*;
-pub use unique::*;
 pub use unique_by_key::*;
+pub use unique::*;
 pub use value::*;
 pub use zip::*;
 

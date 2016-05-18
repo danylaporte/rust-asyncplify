@@ -1,5 +1,6 @@
 use consumer::*;
 use count::*;
+use dedup_by_key::*;
 use dedup::*;
 use filter::*;
 use flat_map::*;
@@ -18,8 +19,8 @@ use subscription::*;
 use sum::*;
 use take_last::*;
 use take::*;
-use unique::*;
 use unique_by_key::*;
+use unique::*;
 use zip::*;
 
 pub trait Stream<T> {
@@ -64,6 +65,29 @@ pub trait Stream<T> {
         where Self: Sized
     {
         Dedup::new(self)
+    }
+
+    /// Creates a stream that emit only immediate new elements.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = [0, 1, 1, 2, 2, 3]
+    ///     .into_iter()
+    ///     .map(|i| *i)
+    ///     .to_stream()
+    ///     .dedup_by_key(|i| *i)
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```
+    fn dedup_by_key<F, K>(self, key_selector: F) -> DedupByKey<Self, F, K>
+        where Self: Sized,
+              F: FnMut(&T) -> K
+    {
+        DedupByKey::new(self, key_selector)
     }
 
     /// Creates a stream which uses a closure to determine if an element should be emitted.
