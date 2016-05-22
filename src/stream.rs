@@ -1,3 +1,4 @@
+use clonable::*;
 use consumer::*;
 use count::*;
 use dedup_by_key::*;
@@ -353,6 +354,34 @@ pub trait Stream<T> {
         Scan::new(self, initial, func)
     }
 
+    /// Share the stream for reuse of the output.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// let mut count = 0;
+    ///
+    /// let mut clonable = (0..10)
+    ///     .to_stream()
+    ///     .inspect(|_| {
+    ///         count += 1;
+    ///         assert!(count <= 10, "count = {}", count);
+    ///     })
+    ///     .clonable();
+    ///
+    /// let min = clonable.clone().min();
+    /// let max = clonable.clone().max();
+    ///
+    /// Zip::new(min, max).subscribe_action(|r| assert!(r == (0, 9), "r = {:?}", r));
+    /// ```
+    fn clonable(self) -> Clonable<Self, T>
+        where Self: Sized,
+              T: Clone
+    {
+        Clonable::new(self)
+    }
+
     /// Ignore the first X values from the stream
     ///
     /// # Examples
@@ -390,7 +419,7 @@ pub trait Stream<T> {
     {
         SkipLast::new(self, count)
     }
-    
+
     /// Ignores items until the trigger emit a value.
     ///
     /// # An example that emit all values
@@ -424,7 +453,21 @@ pub trait Stream<T> {
     fn subscribe(self)
         where Self: Sized
     {
-        self.consume(Subscription::new());
+        self.consume(Subscription);
+    }
+
+    fn subscribe_action<F>(self, action: F)
+        where Self: Sized,
+              F: FnMut(T)
+    {
+        self.consume(SubscriptionAction::new(action));
+    }
+
+    fn subscribe_func<F>(self, predicate: F)
+        where Self: Sized,
+              F: FnMut(T) -> bool
+    {
+        self.consume(SubscriptionFunc::new(predicate));
     }
 
     /// Sums the elements of a stream.

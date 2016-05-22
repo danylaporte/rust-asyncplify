@@ -1,3 +1,4 @@
+mod clonable;
 mod consumer;
 mod count;
 mod dedup_by_key;
@@ -32,6 +33,7 @@ mod unique;
 mod value;
 mod zip;
 
+pub use clonable::*;
 pub use consumer::*;
 pub use count::*;
 pub use dedup_by_key::*;
@@ -77,9 +79,7 @@ mod tests {
         (0..100)
             .to_stream()
             .fold(0i16, |v, i| v + i)
-            .inspect(|v| f = *v)
-            .subscribe();
-
+            .subscribe_action(|v| f = v);
         assert!(f == 4950, "f = {}", f);
     }
 }
