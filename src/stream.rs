@@ -14,6 +14,7 @@ use min_by_key::*;
 use min::*;
 use scan::*;
 use skip_last::*;
+use skip_until::*;
 use skip::*;
 use subscription::*;
 use sum::*;
@@ -388,6 +389,36 @@ pub trait Stream<T> {
         where Self: Sized
     {
         SkipLast::new(self, count)
+    }
+    
+    /// Ignores items until the trigger emit a value.
+    ///
+    /// # An example that emit all values
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..4)
+    ///     .to_stream()
+    ///     .skip_until(Value::new(()))
+    ///     .into_vec();
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```
+    /// # An example that emit no values
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..10)
+    ///     .to_stream()
+    ///     .skip_until(Empty)
+    ///     .into_vec();
+    /// assert!(vec == [], "vec = {:?}", vec);
+    /// ```
+    fn skip_until<U>(self, trigger: U) -> SkipUntil<Self, U>
+        where Self: Sized,
+              U: Stream<()>
+    {
+        SkipUntil::new(self, trigger)
     }
 
     fn subscribe(self)
