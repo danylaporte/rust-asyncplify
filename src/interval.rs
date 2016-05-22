@@ -26,7 +26,7 @@ impl Interval {
     ///
     /// assert!(count == 2, "count = {}", count);
     /// let d = Instant::now().duration_since(start);
-    /// assert!(d < Duration::from_millis(14) && d > Duration::from_millis(9), "d == {:?}", d);
+    /// assert!(d > Duration::from_millis(10), "d == {:?}", d);
     /// ```
     pub fn new(period: Duration) -> Self {
         Interval { period: period }
