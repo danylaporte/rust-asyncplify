@@ -3,6 +3,7 @@ use stream::*;
 use std::thread;
 use std::time::Duration;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Interval {
     period: Duration,
 }

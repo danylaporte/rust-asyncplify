@@ -10,6 +10,7 @@ struct ToVecState<C, F, T>
     vec: Vec<T>,
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct ToVec<S, F> {
     stream: S,
     splitter: F,

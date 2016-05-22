@@ -4,6 +4,7 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Unique<S> {
     stream: S,
 }

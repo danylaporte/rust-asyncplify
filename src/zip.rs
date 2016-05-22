@@ -4,6 +4,7 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Zip<L, R> {
     left: L,
     right: R,

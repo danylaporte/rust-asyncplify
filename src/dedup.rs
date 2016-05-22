@@ -2,6 +2,7 @@ use consumer::*;
 use std::cmp::Eq;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Dedup<S> {
     stream: S,
 }

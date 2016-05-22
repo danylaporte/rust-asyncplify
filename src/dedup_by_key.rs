@@ -3,6 +3,7 @@ use std::cmp::Eq;
 use std::marker::PhantomData;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct DedupByKey<S, F, K> {
     key_selector: F,
     marker_k: PhantomData<K>,

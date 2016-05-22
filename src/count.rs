@@ -26,6 +26,7 @@ impl<C> Drop for CountState<C>
     }
 }
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Count<S, T> {
     stream: S,
     marker_t: PhantomData<T>,

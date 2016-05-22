@@ -3,6 +3,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct SkipUntil<S, T> {
     stream: S,
     trigger: T,

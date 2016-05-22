@@ -5,6 +5,7 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use stream::*;
 
+#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct UniqueByKey<S, F, K> {
     key_selector: F,
     marker_k: PhantomData<K>,
