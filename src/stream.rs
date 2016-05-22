@@ -18,6 +18,7 @@ use skip::*;
 use subscription::*;
 use sum::*;
 use take_last::*;
+use take_until::*;
 use take::*;
 use unique_by_key::*;
 use unique::*;
@@ -451,6 +452,36 @@ pub trait Stream<T> {
         where Self: Sized
     {
         TakeLast::new(self, count)
+    }
+
+    /// Take items until the trigger emit a value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..10)
+    ///     .to_stream()
+    ///     .take_until(Value::new(()))
+    ///     .into_vec();
+    /// assert!(vec == [], "vec = {:?}", vec);
+    /// ```
+    /// ## An example that emit all values
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..4)
+    ///     .to_stream()
+    ///     .take_until(Empty)
+    ///     .into_vec();
+    /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
+    /// ```
+    fn take_until<U>(self, trigger: U) -> TakeUntil<Self, U>
+        where Self: Sized,
+              U: Stream<()>
+    {
+        TakeUntil::new(self, trigger)
     }
 
     /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
