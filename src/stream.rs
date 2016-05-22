@@ -27,6 +27,32 @@ use unique::*;
 use zip::*;
 
 pub trait Stream<T> {
+    /// Makes the stream clonable for reuse of the output.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// let mut count = 0;
+    /// let mut vec = Vec::new();
+    ///
+    /// {
+    ///     let clonable = (0..10).to_stream().inspect(|_| count += 1 ).clonable();
+    ///     let min = clonable.clone().min();
+    ///     let max = clonable.clone().max();
+    ///     Zip::new(min, max).consume(&mut vec);
+    /// }
+    ///
+    /// assert!(vec == [(0, 9)], "vec = {:?}", vec);
+    /// assert!(count == 10, "count = {}", count);
+    /// ```
+    fn clonable(self) -> Clonable<Self, T>
+        where Self: Sized,
+              T: Clone
+    {
+        Clonable::new(self)
+    }
+    
     fn consume<C: Consumer<T>>(self, consumer: C);
 
     /// Count the number of items received.
@@ -352,34 +378,6 @@ pub trait Stream<T> {
               O: Clone
     {
         Scan::new(self, initial, func)
-    }
-
-    /// Share the stream for reuse of the output.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    /// let mut count = 0;
-    ///
-    /// let mut clonable = (0..10)
-    ///     .to_stream()
-    ///     .inspect(|_| {
-    ///         count += 1;
-    ///         assert!(count <= 10, "count = {}", count);
-    ///     })
-    ///     .clonable();
-    ///
-    /// let min = clonable.clone().min();
-    /// let max = clonable.clone().max();
-    ///
-    /// Zip::new(min, max).subscribe_action(|r| assert!(r == (0, 9), "r = {:?}", r));
-    /// ```
-    fn clonable(self) -> Clonable<Self, T>
-        where Self: Sized,
-              T: Clone
-    {
-        Clonable::new(self)
     }
 
     /// Ignore the first X values from the stream

@@ -84,10 +84,13 @@ impl<T> Consumer<T> for ClonableConsumer<T>
 {
     fn emit(&mut self, item: T) -> bool {
         let mut consumers = self.consumers.borrow_mut();
-        let len = consumers.len();
-        for i in len..0 {
-            if !consumers[i - 1].emit(item.clone()) {
-                consumers.remove(i - 1);
+        let mut i = consumers.len();
+        
+        while i > 0 {
+            i -= 1;
+            
+            if !consumers[i].emit(item.clone()) {
+                consumers.remove(i);
             }
         }
 
