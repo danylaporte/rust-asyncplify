@@ -8,12 +8,17 @@ This can almost be considered an alpha version.
 
 I am working on integrating more operators and adaptors such as:
 
-- Sorting
-- Merging, combine, combine, join (only zip done for now)
-- Subjects, sharing of stream
-- Schedulers, multi-threading
-- Retrying and abort streaming
-
+- [ ] Sorting
+- [ ] Merging
+- [ ] Combining
+- [ ] Joining
+- [ ] Subjects
+- [x] Sharing (Clonable)
+- [x] Interval
+- [ ] Multi-Thread
+- [ ] Retrying
+- [x] TakeUntil
+- [x] SkipUntil
 
 ## Documentation
 [Reference](http://danylaporte.github.io/rust-asyncplify)
