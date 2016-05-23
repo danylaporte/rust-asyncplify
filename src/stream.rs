@@ -52,7 +52,7 @@ pub trait Stream<T> {
     {
         Clonable::new(self)
     }
-    
+
     fn consume<C: Consumer<T>>(self, consumer: C);
 
     /// Count the number of items received.
@@ -128,13 +128,10 @@ pub trait Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let mut vec = Vec::new();
-    ///
-    /// (0..5)
+    /// let vec = (0..5)
     ///     .to_stream()
     ///     .filter(|v| *v > 2)
-    ///     .inspect(|v| vec.push(*v))
-    ///     .subscribe();
+    ///     .into_vec();
     ///
     /// assert!(vec == &[3, 4], "vec = {:?}", vec);
     /// ``` 
@@ -191,8 +188,7 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .fold(0, |o, i| o + i)
-    ///     .inspect(|x| v = *x)
-    ///     .subscribe();
+    ///     .subscribe_action(|x| v = x);
     ///
     /// assert!(v == 45, "v = {}", v);
     /// ```
@@ -210,13 +206,11 @@ pub trait Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let mut vec = Vec::new();
-    ///
-    /// (0..10)
+    /// let vec = (0..10)
     ///     .to_stream()
     ///     .group_by(|v| v % 2)
-    ///     .inspect(|g| vec.push(g.get_key()))
-    ///     .subscribe();
+    ///     .map(|g| g.get_key())
+    ///     .into_vec();
     ///
     /// // This gives 2 groups
     /// assert!(vec == vec!(0, 1), "vec = {:?}", vec);
@@ -277,8 +271,8 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .max()
-    ///     .inspect(|v| value = *v)
-    ///     .subscribe();
+    ///     .subscribe_action(|v| value = v);
+    ///
     /// assert!(value == 9, "value = {:?}", value);
     /// ```
     fn max(self) -> Max<Self>
@@ -299,8 +293,8 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .max_by_key(|v| 10 - *v)
-    ///     .inspect(|v| value = *v)
-    ///     .subscribe();
+    ///     .subscribe_action(|v| value = v);
+    ///
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
     fn max_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MaxByKey<Self, F, K>
@@ -321,8 +315,8 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .min()
-    ///     .inspect(|v| value = *v)
-    ///     .subscribe();
+    ///     .subscribe_action(|v| value = v);
+    ///
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
     fn min(self) -> Min<Self>
@@ -343,8 +337,8 @@ pub trait Stream<T> {
     /// (0..10)
     ///     .to_stream()
     ///     .min_by_key(|v| 10 - *v)
-    ///     .inspect(|v| value = *v)
-    ///     .subscribe();
+    ///     .subscribe_action(|v| value = v);
+    ///
     /// assert!(value == 9, "value = {:?}", value);
     /// ```
     fn min_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MinByKey<Self, F, K>
@@ -391,6 +385,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .skip(3)
     ///     .into_vec();
+    ///
     /// assert!(vec == [3, 4, 5, 6, 7, 8, 9], "vec = {:?}", vec);
     /// ```
     fn skip(self, count: u64) -> Skip<Self>
@@ -410,6 +405,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .skip_last(3)
     ///     .into_vec();
+    ///
     /// assert!(vec == [0, 1, 2, 3, 4, 5, 6], "vec = {:?}", vec);
     /// ```
     fn skip_last(self, count: usize) -> SkipLast<Self>
@@ -429,6 +425,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .skip_until(Value::new(()))
     ///     .into_vec();
+    ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
     /// ```
     /// # An example that emit no values
@@ -439,6 +436,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .skip_until(Empty)
     ///     .into_vec();
+    ///
     /// assert!(vec == [], "vec = {:?}", vec);
     /// ```
     fn skip_until<U>(self, trigger: U) -> SkipUntil<Self, U>
@@ -480,6 +478,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .sum()
     ///     .into_vec();
+    ///
     /// assert!(vec == [45], "vec = {:?}", vec);
     /// ```
     fn sum(self) -> Sum<Self>
@@ -499,6 +498,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .take(3)
     ///     .into_vec();
+    ///
     /// assert!(vec == [0, 1, 2], "vec = {:?}", vec);
     /// ```
     fn take(self, count: u64) -> Take<Self>
@@ -518,6 +518,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .take_last(3)
     ///     .into_vec();
+    ///
     /// assert!(vec == [7, 8, 9], "vec = {:?}", vec);
     /// ```
     fn take_last(self, count: usize) -> TakeLast<Self>
@@ -537,6 +538,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .take_until(Value::new(()))
     ///     .into_vec();
+    ///
     /// assert!(vec == [], "vec = {:?}", vec);
     /// ```
     /// ## An example that emit all values
@@ -547,6 +549,7 @@ pub trait Stream<T> {
     ///     .to_stream()
     ///     .take_until(Empty)
     ///     .into_vec();
+    ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
     /// ```
     fn take_until<U>(self, trigger: U) -> TakeUntil<Self, U>
@@ -615,6 +618,7 @@ pub trait Stream<T> {
     /// let right = (4..6).to_stream();
     ///
     /// let vec = (0..4).to_stream().zip(right).into_vec();
+    ///
     /// assert!(vec == [(0, 4),(1, 5)], "vec == {:?}", vec);
     /// ```
     fn zip<R>(self, right: R) -> Zip<Self, R>
