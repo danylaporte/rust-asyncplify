@@ -17,6 +17,7 @@ use scan::*;
 use skip_last::*;
 use skip_until::*;
 use skip::*;
+use sort::*;
 use subscription::*;
 use sum::*;
 use take_last::*;
@@ -444,6 +445,27 @@ pub trait Stream<T> {
               U: Stream<()>
     {
         SkipUntil::new(self, trigger)
+    }
+
+    /// Sort items from the stream. The stream must terminate somewhere, it cannot be an infinite stream here.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = vec![4, 2, 1, 5]
+    ///     .into_iter()
+    ///     .to_stream()
+    ///     .sort()
+    ///     .into_vec();
+    ///
+    /// assert!(vec == [1, 2, 4, 5], "vec = {:?}", vec);
+    /// ```
+    fn sort(self) -> Sort<Self>
+        where Self: Sized
+    {
+        Sort::new(self)
     }
 
     fn subscribe(self)
