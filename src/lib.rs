@@ -12,6 +12,7 @@ mod inspect;
 mod interval;
 mod into_vec;
 mod iter;
+mod last_value;
 mod map;
 mod max_by_key;
 mod max;

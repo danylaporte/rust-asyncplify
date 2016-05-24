@@ -8,6 +8,7 @@ use flat_map::*;
 use fold::*;
 use group_by::*;
 use inspect::*;
+use last_value::*;
 use map::*;
 use max_by_key::*;
 use max::*;
@@ -229,6 +230,24 @@ pub trait Stream<T> {
               Self: Sized
     {
         Inspect::new(self, func)
+    }
+
+    /// Returns the last value from stream.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let value = (0..4).to_stream().last_value().unwrap();
+    /// assert!(value == 3, "value = {}", value);
+    /// ```
+    fn last_value(self) -> Option<T>
+        where Self: Sized
+    {
+        let mut last = LastValue::new();
+        self.consume(&mut last);
+        last.value
     }
 
     /// Takes a closure and creates a stream which calls that closure on each element.

@@ -1,0 +1,7 @@
+[package]
+name = "bench"
+version = "0.1.0"
+authors = ["Dany Laporte <dany_laporte@hotmail.com>"]
+
+[dependencies]
+asyncplify={ path = "../" }
