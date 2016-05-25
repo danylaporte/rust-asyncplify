@@ -1,3 +1,5 @@
+#![cfg(test)]
+
 use test::{Bencher,black_box};
 use asyncplify::*;
 use std::iter;
@@ -30,6 +32,16 @@ fn iter_max(b: &mut Bencher) {
 #[bench]
 fn stream_max(b: &mut Bencher) {
     b.iter(|| (0..black_box(1000)).to_stream().max().last_value());
+}
+
+#[bench]
+fn iter_max_by_key(b: &mut Bencher) {
+    b.iter(|| (0..black_box(1000)).max_by_key(|v| v + 1));
+}
+
+#[bench]
+fn stream_max_by_key(b: &mut Bencher) {
+    b.iter(|| (0..black_box(1000)).to_stream().max_by_key(|v| v + 1).last_value());
 }
 
 #[bench]
