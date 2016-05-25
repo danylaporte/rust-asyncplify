@@ -51,5 +51,5 @@ fn iter_flat_map(b: &mut Bencher) {
 
 #[bench]
 fn stream_flat_map(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().flat_map(|i| Value::new(i)).last_value());
+    b.iter(|| (0..black_box(1000)).to_stream().flat_map(|i| once(i)).last_value());
 }

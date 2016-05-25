@@ -157,7 +157,7 @@ pub trait Stream<T> {
     ///
     /// let vec = (0..4i32)
     ///     .to_stream()
-    ///     .flat_map(|v| Value::new(v + 10))
+    ///     .flat_map(|v| once(v + 10))
     ///     .into_vec();
     ///
     /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
@@ -443,7 +443,7 @@ pub trait Stream<T> {
     ///
     /// let vec = (0..4)
     ///     .to_stream()
-    ///     .skip_until(Value::new(()))
+    ///     .skip_until(once(()))
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
@@ -577,7 +577,7 @@ pub trait Stream<T> {
     ///
     /// let vec = (0..10)
     ///     .to_stream()
-    ///     .take_until(Value::new(()))
+    ///     .take_until(once(()))
     ///     .into_vec();
     ///
     /// assert!(vec == [], "vec = {:?}", vec);

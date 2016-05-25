@@ -18,6 +18,7 @@ mod max_by_key;
 mod max;
 mod min_by_key;
 mod min;
+mod once;
 mod scan;
 mod skip_last;
 mod skip_until;
@@ -32,7 +33,6 @@ mod take;
 mod to_vec;
 mod unique_by_key;
 mod unique;
-mod value;
 mod zip;
 
 pub use clonable::*;
@@ -54,12 +54,13 @@ pub use max_by_key::*;
 pub use max::*;
 pub use min_by_key::*;
 pub use min::*;
+pub use once::*;
 pub use scan::*;
 pub use skip_last::*;
 pub use skip_until::*;
 pub use skip::*;
-pub use stream::*;
 pub use sort::*;
+pub use stream::*;
 pub use subscription::*;
 pub use sum::*;
 pub use take_last::*;
@@ -68,7 +69,6 @@ pub use take::*;
 pub use to_vec::*;
 pub use unique_by_key::*;
 pub use unique::*;
-pub use value::*;
 pub use zip::*;
 
 #[cfg(test)]
