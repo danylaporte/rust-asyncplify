@@ -55,6 +55,16 @@ fn stream_min(b: &mut Bencher) {
 }
 
 #[bench]
+fn iter_min_by_key(b: &mut Bencher) {
+    b.iter(|| (0..black_box(1000)).min_by_key(|v| v + 1));
+}
+
+#[bench]
+fn stream_min_by_key(b: &mut Bencher) {
+    b.iter(|| (0..black_box(1000)).to_stream().min_by_key(|v| v + 1).last_value());
+}
+
+#[bench]
 fn iter_flat_map(b: &mut Bencher) {
     b.iter(|| (0..black_box(1000)).flat_map(|i| iter::once(i)).last());
 }

@@ -22,8 +22,9 @@ impl<C, T, F, K> Consumer<T> for MinByKeyState<C, T, F, K>
     fn emit(&mut self, item: T) -> bool {
         let k = (self.f)(&item);
 
-        if let Some(ref value) = self.value {
+        if let Some(value) = self.value.take() {
             if value.0 < k {
+                self.value = Some(value);
                 return true;
             }
         }
