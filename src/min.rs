@@ -16,13 +16,13 @@ impl<C, T> Consumer<T> for MinState<C, T>
           T: PartialOrd
 {
     fn emit(&mut self, item: T) -> bool {
-        if let Some(ref value) = self.value {
-            if value < &item {
-                return true;
-            }
+        
+        if let Some(current) = self.value.take() {
+            self.value = Some(if current < item { current } else { item });
+        } else {
+            self.value = Some(item);
         }
 
-        self.value = Some(item);
         true
     }
 }
