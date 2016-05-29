@@ -20,7 +20,7 @@ impl<C, F, T> Drop for ToVecState<C, F, T>
     where C: Consumer<Vec<T>>
 {
     fn drop(&mut self) {
-        if self.vec.len() != 0 {
+        if !self.vec.is_empty() {
             let vec = replace(&mut self.vec, Vec::new());
             self.consumer.emit(vec);
         }

@@ -42,7 +42,9 @@ impl<K: Clone, V> Group<K, V> {
         }
         *consumer_ref = None;
     }
+}
 
+impl<K: Clone, V> Clone for Group<K, V> {
     fn clone(&self) -> Self {
         Group {
             consumer: self.consumer.clone(),

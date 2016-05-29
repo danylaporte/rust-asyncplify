@@ -80,10 +80,10 @@ impl<C, L, R> Consumer<L> for ChildLeft<C, L, R>
     where C: Consumer<(L, R)>
 {
     fn emit(&mut self, item: L) -> bool {
-        let ref mut common = *self.common.borrow_mut();
+        let mut common = self.common.borrow_mut();
 
         if let Some(right) = common.right.pop_back() {
-            common.consumer.emit((item, right)) && (!common.right_closed || common.right.len() > 0)
+            common.consumer.emit((item, right)) && (!common.right_closed || !common.right.is_empty())
         } else if !common.right_closed {
             common.left.push_front(item);
             true
@@ -97,10 +97,10 @@ impl<C, L, R> Consumer<R> for ChildRight<C, L, R>
     where C: Consumer<(L, R)>
 {
     fn emit(&mut self, item: R) -> bool {
-        let ref mut common = *self.common.borrow_mut();
+        let mut common = self.common.borrow_mut();
 
         if let Some(left) = common.left.pop_back() {
-            common.consumer.emit((left, item)) && (!common.left_closed || common.left.len() > 0)
+            common.consumer.emit((left, item)) && (!common.left_closed || !common.left.is_empty())
         } else if !common.left_closed {
             common.right.push_front(item);
             true
