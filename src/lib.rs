@@ -1,4 +1,4 @@
-//! asyncplify — Functional Reactive Programming (FRP) library (RX like) for rust.
+//! Functional Reactive Programming (FRP) library (RX like) for rust.
 //!
 //! This library is the oposite of the iterator as those operators are pushed based instead of pull based like an iterator.
 //! It can serve as a base for async operations and coordinations.
