@@ -86,7 +86,6 @@ pub use skip_until::*;
 pub use skip::*;
 pub use sort::*;
 pub use stream::*;
-pub use subscription::*;
 pub use sum::*;
 pub use take_last::*;
 pub use take_until::*;
