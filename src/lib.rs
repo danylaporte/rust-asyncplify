@@ -1,3 +1,28 @@
+//! asyncplify — Functional Reactive Programming (FRP) library (RX like) for rust.
+//!
+//! This library is the oposite of the iterator as those operators are pushed based instead of pull based like an iterator.
+//! It can serve as a base for async operations and coordinations.
+//!
+//! # Example
+//! ```
+//! use asyncplify::*;
+//!
+//! let v = (0..10)
+//!     .to_stream()     // convert the iterator to stream
+//!     .map(|v| v + 10) // add 10 to all items coming from the stream
+//!     .sum()           // sum all the values and push the sum to the stream
+//!     .last_value()    // returns the last incoming values from the stream
+//!     .unwrap();
+//!
+//! println!("The sum is {}", v);
+//! ```
+//!
+//! Most operators are available under the [`Stream` trait](./trait.Stream.html).
+//!
+//! ## License
+//! [The MIT License (MIT)](http://opensource.org/licenses/MIT)
+//!
+
 mod clonable;
 mod consumer;
 mod count;
