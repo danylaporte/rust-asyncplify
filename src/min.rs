@@ -1,6 +1,5 @@
 use consumer::*;
 use std::cmp::PartialOrd;
-use std::mem::replace;
 use stream::*;
 
 struct MinState<C, T>
@@ -15,14 +14,15 @@ impl<C, T> Consumer<T> for MinState<C, T>
     where C: Consumer<T>,
           T: PartialOrd
 {
-    fn emit(&mut self, item: T) -> bool {
-        
+    fn emit(&mut self, mut item: T) -> bool {
+
         if let Some(current) = self.value.take() {
-            self.value = Some(if current < item { current } else { item });
-        } else {
-            self.value = Some(item);
+            if current < item {
+                item = current;
+            }
         }
 
+        self.value = Some(item);
         true
     }
 }
@@ -32,7 +32,7 @@ impl<C, T> Drop for MinState<C, T>
           T: PartialOrd
 {
     fn drop(&mut self) {
-        if let Some(value) = replace(&mut self.value, None) {
+        if let Some(value) = self.value.take() {
             self.consumer.emit(value);
         }
     }

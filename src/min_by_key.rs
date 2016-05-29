@@ -1,7 +1,6 @@
 use consumer::*;
 use std::cmp::PartialOrd;
 use std::marker::PhantomData;
-use std::mem::replace;
 use stream::*;
 
 struct MinByKeyState<C, T, F, K>
@@ -20,16 +19,16 @@ impl<C, T, F, K> Consumer<T> for MinByKeyState<C, T, F, K>
           K: PartialOrd
 {
     fn emit(&mut self, item: T) -> bool {
-        let k = (self.f)(&item);
 
-        if let Some(value) = self.value.take() {
-            if value.0 < k {
-                self.value = Some(value);
-                return true;
+        let mut value = ((self.f)(&item), item);
+
+        if let Some(current) = self.value.take() {
+            if current.0 < value.0 {
+                value = current;
             }
         }
 
-        self.value = Some((k, item));
+        self.value = Some(value);
         true
     }
 }
@@ -40,7 +39,7 @@ impl<C, T, F, K> Drop for MinByKeyState<C, T, F, K>
           K: PartialOrd
 {
     fn drop(&mut self) {
-        if let Some(value) = replace(&mut self.value, None) {
+        if let Some(value) = self.value.take() {
             self.consumer.emit(value.1);
         }
     }
