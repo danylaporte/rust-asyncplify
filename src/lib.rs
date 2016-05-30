@@ -8,7 +8,7 @@
 //! use asyncplify::*;
 //!
 //! let v = (0..10)
-//!     .to_stream()     // convert the iterator to stream
+//!     .into_stream()     // convert the iterator to stream
 //!     .map(|v| v + 10) // add 10 to all items coming from the stream
 //!     .sum()           // sum all the values and push the sum to the stream
 //!     .last_value()    // returns the last incoming values from the stream
@@ -104,7 +104,7 @@ mod tests {
         let mut f = 0i16;
 
         (0..100)
-            .to_stream()
+            .into_stream()
             .fold(0i16, |v, i| v + i)
             .subscribe_action(|v| f = v);
         assert!(f == 4950, "f = {}", f);

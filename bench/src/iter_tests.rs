@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use test::{Bencher,black_box};
+use test::{Bencher, black_box};
 use asyncplify::*;
 use std::iter;
 
@@ -11,7 +11,7 @@ fn iter_count(b: &mut Bencher) {
 
 #[bench]
 fn stream_count(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().count().last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().count().last_value());
 }
 
 #[bench]
@@ -21,7 +21,7 @@ fn iter_map(b: &mut Bencher) {
 
 #[bench]
 fn stream_map(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().map(|i| i + 2).last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().map(|i| i + 2).last_value());
 }
 
 #[bench]
@@ -31,7 +31,7 @@ fn iter_max(b: &mut Bencher) {
 
 #[bench]
 fn stream_max(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().max().last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().max().last_value());
 }
 
 #[bench]
@@ -41,7 +41,7 @@ fn iter_max_by_key(b: &mut Bencher) {
 
 #[bench]
 fn stream_max_by_key(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().max_by_key(|v| v + 1).last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().max_by_key(|v| v + 1).last_value());
 }
 
 #[bench]
@@ -51,7 +51,7 @@ fn iter_min(b: &mut Bencher) {
 
 #[bench]
 fn stream_min(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().min().last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().min().last_value());
 }
 
 #[bench]
@@ -61,7 +61,7 @@ fn iter_min_by_key(b: &mut Bencher) {
 
 #[bench]
 fn stream_min_by_key(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().min_by_key(|v| v + 1).last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().min_by_key(|v| v + 1).last_value());
 }
 
 #[bench]
@@ -71,5 +71,5 @@ fn iter_flat_map(b: &mut Bencher) {
 
 #[bench]
 fn stream_flat_map(b: &mut Bencher) {
-    b.iter(|| (0..black_box(1000)).to_stream().flat_map(|i| once(i)).last_value());
+    b.iter(|| (0..black_box(1000)).into_stream().flat_map(|i| once(i)).last_value());
 }

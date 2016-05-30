@@ -41,7 +41,7 @@ pub trait IntoVecStream<T>: Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let vec = (0..5).to_stream().into_vec();
+    /// let vec = (0..5).into_stream().into_vec();
     /// assert!(vec == [0, 1, 2, 3, 4], "vec = {:?}", vec);
     /// ```
     fn into_vec(self) -> Vec<T>

@@ -38,7 +38,7 @@ use asyncplify::*;
 
 fn main() {
     let v = (0..10)
-        .to_stream()        // convert the iterator into a stream
+        .into_stream()        // convert the iterator into a stream
         .map(|v| v + 10)    // add 10 to all elements of the stream
         .sum()              // sum it up
         .last_value()       // return the last value

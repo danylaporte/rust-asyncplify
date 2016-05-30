@@ -23,8 +23,8 @@ impl<L, R> Zip<L, R>
     /// ```
     /// use asyncplify::*;
     ///
-    /// let left = (0..4).to_stream();
-    /// let right = (4..6).to_stream();
+    /// let left = (0..4).into_stream();
+    /// let right = (4..6).into_stream();
     ///
     /// let vec = Zip::new(left, right).into_vec();
     /// assert!(vec == [(0, 4),(1, 5)], "vec == {:?}", vec);

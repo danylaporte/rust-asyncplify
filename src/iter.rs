@@ -20,7 +20,7 @@ impl<I, T> Stream<T> for IterStream<I>
 }
 
 /// Extend the Iterator trait with stream conversion operators
-pub trait ToStream: Iterator {
+pub trait IntoStream: Iterator {
     /// Convert an iterator to a `Stream`.
     ///
     /// # Examples
@@ -29,16 +29,16 @@ pub trait ToStream: Iterator {
     /// use asyncplify::*;
     ///
     /// let vec = (0..5)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3, 4], "vec = {:?}", vec);
-    /// ``` 
-    fn to_stream(self) -> IterStream<Self>
+    /// ```
+    fn into_stream(self) -> IterStream<Self>
         where Self: Sized
     {
         IterStream { iterator: self }
     }
 }
 
-impl<I> ToStream for I where I: Iterator {}
+impl<I> IntoStream for I where I: Iterator {}

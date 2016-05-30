@@ -69,7 +69,7 @@ pub trait ToVecStream<T>: Stream<T> {
     /// let mut v = Vec::new();
     ///
     /// (0..3)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .to_vec(|vec| vec.len() == 2)  // split after 2 items
     ///     .inspect(|vec| v.push(vec.len()))
     ///     .subscribe();

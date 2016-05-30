@@ -39,7 +39,7 @@ pub trait Stream<T> {
     /// let mut vec = Vec::new();
     ///
     /// {
-    ///     let clonable = (0..10).to_stream().inspect(|_| count += 1 ).clonable();
+    ///     let clonable = (0..10).into_stream().inspect(|_| count += 1 ).clonable();
     ///     let min = clonable.clone().min();
     ///     let max = clonable.clone().max();
     ///     Zip::new(min, max).consume(&mut vec);
@@ -65,7 +65,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .count()
     ///     .into_vec();
     /// assert!(vec == [10], "vec = {:?}", vec);
@@ -86,7 +86,7 @@ pub trait Stream<T> {
     /// let vec = [0, 1, 1, 2, 2, 3]
     ///     .into_iter()
     ///     .map(|i| *i)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .dedup()
     ///     .into_vec();
     ///
@@ -108,7 +108,7 @@ pub trait Stream<T> {
     /// let vec = [0, 1, 1, 2, 2, 3]
     ///     .into_iter()
     ///     .map(|i| *i)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .dedup_by_key(|i| *i)
     ///     .into_vec();
     ///
@@ -131,7 +131,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..5)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .filter(|v| *v > 2)
     ///     .into_vec();
     ///
@@ -156,7 +156,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..4i32)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .flat_map(|v| once(v + 10))
     ///     .into_vec();
     ///
@@ -188,7 +188,7 @@ pub trait Stream<T> {
     /// let mut v = 0;
     ///
     /// (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .fold(0, |o, i| o + i)
     ///     .subscribe_action(|x| v = x);
     ///
@@ -209,7 +209,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .group_by(|v| v % 2)
     ///     .map(|g| g.get_key())
     ///     .into_vec();
@@ -239,7 +239,7 @@ pub trait Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let value = (0..4).to_stream().last_value().unwrap();
+    /// let value = (0..4).into_stream().last_value().unwrap();
     /// assert!(value == 3, "value = {}", value);
     /// ```
     fn last_value(self) -> Option<T>
@@ -267,7 +267,7 @@ pub trait Stream<T> {
     /// let mut value = 0;
     ///
     /// let vec = (0..4)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .map(|v| v + 10)
     ///     .into_vec();
     /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
@@ -289,7 +289,7 @@ pub trait Stream<T> {
     /// let mut value = 0;
     ///
     /// (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .max()
     ///     .subscribe_action(|v| value = v);
     ///
@@ -311,7 +311,7 @@ pub trait Stream<T> {
     /// let mut value = 100;
     ///
     /// (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .max_by_key(|v| 10 - *v)
     ///     .subscribe_action(|v| value = v);
     ///
@@ -333,7 +333,7 @@ pub trait Stream<T> {
     /// let mut value = 100;
     ///
     /// (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .min()
     ///     .subscribe_action(|v| value = v);
     ///
@@ -355,7 +355,7 @@ pub trait Stream<T> {
     /// let mut value = 100;
     ///
     /// (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .min_by_key(|v| 10 - *v)
     ///     .subscribe_action(|v| value = v);
     ///
@@ -380,7 +380,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..6)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .scan(0, |o, i| o + i)
     ///     .into_vec();
     ///
@@ -402,7 +402,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .skip(3)
     ///     .into_vec();
     ///
@@ -422,7 +422,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .skip_last(3)
     ///     .into_vec();
     ///
@@ -442,7 +442,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..4)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .skip_until(once(()))
     ///     .into_vec();
     ///
@@ -453,7 +453,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .skip_until(Empty)
     ///     .into_vec();
     ///
@@ -475,7 +475,7 @@ pub trait Stream<T> {
     ///
     /// let vec = vec![4, 2, 1, 5]
     ///     .into_iter()
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .sort()
     ///     .into_vec();
     ///
@@ -516,7 +516,7 @@ pub trait Stream<T> {
     /// ```
     /// use asyncplify::*;
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .sum()
     ///     .into_vec();
     ///
@@ -536,7 +536,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .take(3)
     ///     .into_vec();
     ///
@@ -556,7 +556,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .take_last(3)
     ///     .into_vec();
     ///
@@ -576,7 +576,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..10)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .take_until(once(()))
     ///     .into_vec();
     ///
@@ -587,7 +587,7 @@ pub trait Stream<T> {
     /// use asyncplify::*;
     ///
     /// let vec = (0..4)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .take_until(Empty)
     ///     .into_vec();
     ///
@@ -610,7 +610,7 @@ pub trait Stream<T> {
     /// let vec = [0, 1, 0, 1, 0, 2, 3]
     ///     .into_iter()
     ///     .map(|i| *i)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .unique()
     ///     .into_vec();
     ///
@@ -632,7 +632,7 @@ pub trait Stream<T> {
     /// let vec = [0, 1, 0, 1, 0, 2, 3]
     ///     .into_iter()
     ///     .map(|i| *i)
-    ///     .to_stream()
+    ///     .into_stream()
     ///     .unique_by_key(|v| *v)
     ///     .into_vec();
     ///
@@ -656,9 +656,9 @@ pub trait Stream<T> {
     /// ```
     /// use asyncplify::*;
     ///
-    /// let right = (4..6).to_stream();
+    /// let right = (4..6).into_stream();
     ///
-    /// let vec = (0..4).to_stream().zip(right).into_vec();
+    /// let vec = (0..4).into_stream().zip(right).into_vec();
     ///
     /// assert!(vec == [(0, 4),(1, 5)], "vec == {:?}", vec);
     /// ```
