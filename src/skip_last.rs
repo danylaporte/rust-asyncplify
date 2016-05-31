@@ -10,7 +10,7 @@ struct SkipLastState<C, T>
     queue: VecDeque<T>,
 }
 
-/// A stream that ignores the n last items.
+/// Ignores the last n items.
 ///
 /// This struct is created by the [skip_last()](./trait.Stream.html#method.skip_last) method on [Stream](./trait.Stream.html).
 /// See its documentation for more.

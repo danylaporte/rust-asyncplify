@@ -31,7 +31,7 @@ impl<C, T> Drop for SumState<C, T>
     }
 }
 
-/// A stream that sum all the items of a stream and emit only a single item as the total.
+/// Sum all the items and emit only a single item as the total.
 ///
 /// This struct is created by the [sum()](./trait.Stream.html#method.sum) method on [Stream](./trait.Stream.html).
 /// See its documentation for more.

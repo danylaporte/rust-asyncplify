@@ -10,7 +10,7 @@ struct TakeLastState<C, T>
     queue: VecDeque<T>,
 }
 
-/// A stream that only emit the last n items of a stream.
+/// Emit the last n items of a stream.
 ///
 /// This struct is created by the [take_last()](./trait.Stream.html#method.take_last) method on [Stream](./trait.Stream.html).
 /// See its documentation for more.
