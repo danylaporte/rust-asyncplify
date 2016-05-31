@@ -6,6 +6,10 @@ struct TakeState<C> {
     count: u64,
 }
 
+/// A stream that only emit the last n items of a stream.
+///
+/// This struct is created by the [take()](./trait.Stream.html#method.take) method on [Stream](./trait.Stream.html).
+/// See its documentation for more.
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Take<S> {
     count: u64,
