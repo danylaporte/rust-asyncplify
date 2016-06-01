@@ -46,6 +46,7 @@ mod min_by_key;
 mod min;
 mod once;
 mod scan;
+pub mod schedulers;
 mod skip_last;
 mod skip_until;
 mod skip;
