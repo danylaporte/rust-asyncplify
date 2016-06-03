@@ -12,8 +12,9 @@ struct TakeLastState<C, T>
 
 /// Emit the last n items of a stream.
 ///
-/// This struct is created by the [take_last()](./trait.Stream.html#method.take_last) method on [Stream](./trait.Stream.html).
-/// See its documentation for more.
+/// This struct is created by the
+/// [`take_last()`](./trait.Stream.html#method.take_last) method on
+/// [Stream](./trait.Stream.html). See its documentation for more.
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct TakeLast<S> {
     count: usize,

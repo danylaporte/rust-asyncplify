@@ -121,9 +121,12 @@ pub trait Stream<T> {
         DedupByKey::new(self, key_selector)
     }
 
-    /// Creates a stream which uses a closure to determine if an element should be emitted.
-    /// The closure must return true or false. `filter()` creates a stream which calls this closure on each element. If the closure returns true, 
-    /// then the element is returned. If the closure returns false, it will try again, and call the closure on the next element, seeing if it passes the test.
+    /// Creates a stream which uses a closure to determine if an element should
+    /// be emitted. The closure must return true or false. `filter()` creates a
+    /// stream which calls this closure on each element. If the closure returns
+    /// true, then the element is returned. If the closure returns false, it
+    /// will try again, and call the closure on the next element, seeing if it
+    /// passes the test.
     ///
     /// # Examples
     ///
@@ -136,7 +139,7 @@ pub trait Stream<T> {
     ///     .into_vec();
     ///
     /// assert!(vec == &[3, 4], "vec = {:?}", vec);
-    /// ``` 
+    /// ```
     fn filter<F>(self, predicate: F) -> Filter<Self, F>
         where Self: Sized,
               F: FnMut(&mut T) -> bool
@@ -145,10 +148,13 @@ pub trait Stream<T> {
     }
 
     /// Creates an stream that works like map, but flattens nested structure.
-    /// The `map()` adapter is very useful, but only when the closure argument produces values. 
-    /// If it produces a stream instead, there's an extra layer of indirection. flat_map() will remove this extra layer on its own.
+    /// The `map()` adapter is very useful, but only when the closure argument
+    /// produces values. If it produces a stream instead, there's an extra layer
+    /// of indirection. flat_map() will remove this extra layer on its own.
     ///
-    /// Another way of thinking about flat_map(): map()'s closure returns one item for each element, and flat_map()'s closure returns a stream for each element.
+    /// Another way of thinking about flat_map(): map()'s closure returns one
+    /// item for each element, and flat_map()'s closure returns a stream for
+    /// each element.
     ///
     /// # Examples
     ///
@@ -170,22 +176,23 @@ pub trait Stream<T> {
         Flatmap::new(self, func)
     }
 
-    /// A stream adaptor that applies a function, producing a single, final value.
-    ///`fold()` takes two arguments: an initial value, and a closure with two arguments: an 'accumulator', and an element. 
-    /// It returns the value that the accumulator should have for the next iteration.
+    /// A stream adaptor that applies a function, producing a single, final
+    /// value. `fold()` takes two arguments: an initial value, and a closure
+    /// with two arguments: an 'accumulator', and an element. It returns the
+    /// value that the accumulator should have for the next iteration.
     ///
-    /// The initial value is the value the accumulator will have on the first call.
-    /// After applying this closure to every element of the iterator, `fold()` returns the accumulator.
+    /// The initial value is the value the accumulator will have on the first
+    /// call. After applying this closure to every element of the iterator,
+    /// `fold()` returns the accumulator.
     ///
-    /// This operation is sometimes called 'reduce' or 'inject'.
-
-    /// Folding is useful whenever you have a collection of something, and want to produce a single value from it.
+    /// This operation is sometimes called 'reduce' or 'inject'. Folding is
+    /// useful whenever you have a collection of something, and want to produce
+    /// a single value from it.
     ///
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;
-    /// let mut v = 0;
+    /// use asyncplify::*; let mut v = 0;
     ///
     /// (0..10)
     ///     .into_stream()
@@ -250,14 +257,19 @@ pub trait Stream<T> {
         last.value
     }
 
-    /// Takes a closure and creates a stream which calls that closure on each element.
-    /// `map()` transforms one stream into another, by means of its argument: something that implements FnMut. It produces a new stream which calls this closure 
-    /// on each element of the original stream.
+    /// Takes a closure and creates a stream which calls that closure on each
+    /// element. `map()` transforms one stream into another, by means of its
+    /// argument: something that implements FnMut. It produces a new stream
+    /// which calls this closure on each element of the original stream.
     ///
-    /// If you are good at thinking in types, you can think of map() like this: If you have a stream that gives you elements of some type A, and you want a stream
-    /// of some other type B, you can use `map()`, passing a closure that takes an A and returns a B.
-    /// `map()` is conceptually similar to a for loop. However, as `map()` is lazy, it is best used when you're already working with other streams. If you're doing
-    /// some sort of looping for a side effect, it's considered more idiomatic to use for than `map()`.`
+    /// If you are good at thinking in types, you can think of map() like this:
+    /// If you have a stream that gives you elements of some type A, and you
+    /// want a stream of some other type B, you can use `map()`, passing a
+    /// closure that takes an A and returns a B. `map()` is conceptually similar
+    /// to a for loop. However, as `map()` is lazy, it is best used when you're
+    /// already working with other streams. If you're doing some sort of looping
+    /// for a side effect, it's considered more idiomatic to use for than
+    /// `map()`.`
     ///
     /// # Examples
     ///
@@ -279,14 +291,13 @@ pub trait Stream<T> {
         Map::new(self, func)
     }
 
-    /// Returns the maximum element of a stream.
-    /// Returns the lastest element if the comparison determines two elements to be equally maximum.
+    /// Returns the maximum element of a stream. Returns the lastest element if
+    /// the comparison determines two elements to be equally maximum.
     ///
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;
-    /// let mut value = 0;
+    /// use asyncplify::*; let mut value = 0;
     ///
     /// (0..10)
     ///     .into_stream()
@@ -301,14 +312,14 @@ pub trait Stream<T> {
         Max::new(self)
     }
 
-    /// Returns the element that gives the maximum value from the specified function.
-    /// Returns the lastest element if the comparison determines two elements to be equally maximum.
+    /// Returns the element that gives the maximum value from the specified
+    /// function. Returns the lastest element if the comparison determines two
+    /// elements to be equally maximum.
     ///
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
+    /// use asyncplify::*; let mut value = 100;
     ///
     /// (0..10)
     ///     .into_stream()
@@ -323,14 +334,13 @@ pub trait Stream<T> {
         MaxByKey::new(self, f)
     }
 
-    /// Returns the minimum element of a stream.
-    /// Returns the lastest element if the comparison determines two elements to be equally minimum.
+    /// Returns the minimum element of a stream. Returns the lastest element if
+    /// the comparison determines two elements to be equally minimum.
     ///
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
+    /// use asyncplify::*; let mut value = 100;
     ///
     /// (0..10)
     ///     .into_stream()
@@ -345,14 +355,14 @@ pub trait Stream<T> {
         Min::new(self)
     }
 
-    /// Returns the element that gives the minimum value from the specified function.
-    /// Returns the lastest element if the comparison determines two elements to be equally minimum.
+    /// Returns the element that gives the minimum value from the specified
+    /// function. Returns the lastest element if the comparison determines two
+    /// elements to be equally minimum.
     ///
     /// # Examples
     ///
     /// ```
-    /// use asyncplify::*;
-    /// let mut value = 100;
+    /// use asyncplify::*; let mut value = 100;
     ///
     /// (0..10)
     ///     .into_stream()
@@ -367,12 +377,16 @@ pub trait Stream<T> {
         MinByKey::new(self, f)
     }
 
-    /// A stream adaptor similar to `fold()` that holds internal state and produces a new stream.
-    /// `scan()` takes two arguments: an initial value which seeds the internal state, and a closure with two arguments, 
-    /// the first being a mutable reference to the internal state and the second an stream element. The closure can assign 
-    /// to the internal state to share state between iterations.
-
-    /// On iteration, the closure will be applied to each element of the stream and the return value from the closure, an Option, is emitted by the stream.
+    /// A stream adaptor similar to `fold()` that holds internal state and
+    /// produces a new stream. `scan()` takes two arguments: an initial value
+    /// which seeds the internal state, and a closure with two arguments, the
+    /// first being a mutable reference to the internal state and the second an
+    /// stream element. The closure can assign to the internal state to share
+    /// state between iterations.
+    ///
+    /// On iteration, the closure will be applied to each element of the stream
+    /// and the return value from the closure, an Option, is emitted by the
+    /// stream.
     ///
     /// # Examples
     ///
@@ -466,7 +480,8 @@ pub trait Stream<T> {
         SkipUntil::new(self, trigger)
     }
 
-    /// Sort items from the stream. The stream must terminate somewhere, it cannot be an infinite stream here.
+    /// Sort items from the stream. The stream must terminate somewhere, it
+    /// cannot be an infinite stream here.
     ///
     /// # Examples
     ///
@@ -600,7 +615,8 @@ pub trait Stream<T> {
         TakeUntil::new(self, trigger)
     }
 
-    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    /// Creates a stream that emit only new elements. If an element has already
+    /// been emitted, it is ignored.
     ///
     /// # Examples
     ///
@@ -615,14 +631,15 @@ pub trait Stream<T> {
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
-    /// ```     
+    /// ```
     fn unique(self) -> Unique<Self>
         where Self: Sized
     {
         Unique::new(self)
     }
 
-    /// Creates a stream that emit only new elements. If an element has already been emitted, it is ignored.
+    /// Creates a stream that emit only new elements. If an element has already
+    /// been emitted, it is ignored.
     ///
     /// # Examples
     ///
@@ -637,7 +654,7 @@ pub trait Stream<T> {
     ///     .into_vec();
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
-    /// ```     
+    /// ```
     fn unique_by_key<F, K>(self, key_selector: F) -> UniqueByKey<Self, F, K>
         where Self: Sized,
               F: FnMut(&T) -> K
@@ -646,13 +663,15 @@ pub trait Stream<T> {
     }
 
     /// 'Zips up' two streams into a single stream of pairs.
-    /// `zip()` returns a new stream that will iterate over two other streams, returning a tuple where the first element comes from the first stream,
+    ///
+    /// `zip()` returns a new stream that will iterate over two other streams,
+    /// returning a tuple where the first element comes from the first stream,
     /// and the second element comes from the second stream.
     ///
     /// In other words, it zips two stream together, into a single one.
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use asyncplify::*;
     ///

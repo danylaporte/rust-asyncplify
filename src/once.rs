@@ -3,7 +3,8 @@ use stream::*;
 
 /// A stream that emits an element exactly once.
 ///
-/// This `struct` is created by the [`once()`] function. See its documentation for more.
+/// This `struct` is created by the [`once()`] function. See its documentation
+/// for more.
 ///
 /// [`once()`]: fn.once.html
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]

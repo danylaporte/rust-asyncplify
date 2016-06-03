@@ -10,24 +10,24 @@ pub struct Zip<L, R> {
     right: R,
 }
 
-impl<L, R> Zip<L, R>
-{
+impl<L, R> Zip<L, R> {
     /// 'Zips up' two streams into a single stream of pairs.
-    /// `zip()` returns a new stream that will iterate over two other streams, returning a tuple where the first element comes from the first stream,
+    ///
+    /// `zip()` returns a new stream that will iterate over two other streams,
+    /// returning a tuple where the first element comes from the first stream,
     /// and the second element comes from the second stream.
     ///
     /// In other words, it zips two stream together, into a single one.
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use asyncplify::*;
     ///
-    /// let left = (0..4).into_stream();
-    /// let right = (4..6).into_stream();
+    /// let left = (0..4).into_stream(); let right = (4..6).into_stream();
     ///
-    /// let vec = Zip::new(left, right).into_vec();
-    /// assert!(vec == [(0, 4),(1, 5)], "vec == {:?}", vec);
+    /// let vec = Zip::new(left, right).into_vec(); assert!(vec == [(0, 4),(1,
+    /// 5)], "vec == {:?}", vec);
     /// ```
     pub fn new(left: L, right: R) -> Self {
         Zip {
@@ -83,7 +83,8 @@ impl<C, L, R> Consumer<L> for ChildLeft<C, L, R>
         let mut common = self.common.borrow_mut();
 
         if let Some(right) = common.right.pop_back() {
-            common.consumer.emit((item, right)) && (!common.right_closed || !common.right.is_empty())
+            common.consumer.emit((item, right)) &&
+            (!common.right_closed || !common.right.is_empty())
         } else if !common.right_closed {
             common.left.push_front(item);
             true

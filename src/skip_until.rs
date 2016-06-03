@@ -5,7 +5,8 @@ use stream::*;
 
 /// Ignores items until another stream emit one item.
 ///
-/// This struct is created by the [skip_until()](./trait.Stream.html#method.skip_until) method on [Stream](./trait.Stream.html).
+/// This struct is created by the [`skip_until()`](./trait.Stream.html#method.skip_until)
+/// method on [Stream](./trait.Stream.html).
 /// See its documentation for more.
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct SkipUntil<S, T> {

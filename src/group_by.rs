@@ -69,12 +69,12 @@ impl<C, F, K, V> Consumer<V> for GroupByState<C, F, K, V>
         let consumer = &mut self.consumer;
         let mut is_available = true;
         let mut g = self.hashmap
-                        .entry(key.clone())
-                        .or_insert_with(|| {
-                            let g = Group::new(key);
-                            is_available = consumer.emit(g.clone());
-                            g
-                        });
+            .entry(key.clone())
+            .or_insert_with(|| {
+                let g = Group::new(key);
+                is_available = consumer.emit(g.clone());
+                g
+            });
 
         if is_available {
             g.emit(item);

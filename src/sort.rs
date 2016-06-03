@@ -2,10 +2,11 @@ use consumer::*;
 use std::cmp::Ord;
 use stream::*;
 
-/// Accumulates all items inside a vec, sort the result and emit all values ordered.
+/// Accumulates all items inside a vec, sort the result and emit all values
+/// ordered.
 ///
-/// This struct is created by the [sort()](./trait.Stream.html#method.sort) method on [Stream](./trait.Stream.html).
-/// See its documentation for more.
+/// This struct is created by the [`sort()`](./trait.Stream.html#method.sort)
+/// method on [Stream](./trait.Stream.html). See its documentation for more.
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Sort<S> {
     stream: S,

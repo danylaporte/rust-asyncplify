@@ -22,7 +22,7 @@ impl<C, F, I, O, S> Consumer<I> for FlatmapState<C, F, I, O, S>
         if self.child.consumer.borrow().is_none() {
             return false;
         }
-        
+
         let stream = (self.func)(item);
         stream.consume(self.child.clone());
         self.child.consumer.borrow().is_some()
@@ -41,13 +41,13 @@ impl<C, O> Consumer<O> for Rc<Child<C, O>>
 {
     fn emit(&mut self, item: O) -> bool {
         let mut consumer_ref = self.consumer.borrow_mut();
-        
+
         if let Some(ref mut consumer) = *consumer_ref {
             if consumer.emit(item) {
                 return true;
             }
         }
-        
+
         *consumer_ref = None;
         false
     }
