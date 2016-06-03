@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::time::{Duration, Instant};
 use super::scheduler::*;
+use std::thread::sleep;
 
 pub struct CurrentThread;
 
@@ -19,8 +20,8 @@ impl CurrentThread {
 }
 
 impl Scheduler for CurrentThread {
-    fn schedule(&mut self, func: Action, delay: Duration) {
-        CURRENT_THREAD.with(|f| f.borrow_mut().schedule(func, delay));
+    fn schedule(&mut self, item: Action, delay: Duration) {
+        CURRENT_THREAD.with(|f| f.borrow_mut().schedule(item, delay));
     }
 }
 
@@ -45,23 +46,39 @@ impl ThreadCell {
         }
     }
 
-    fn run_pending_actions(&mut self) {
+    fn schedule_item(&mut self, action: Action, delay: Duration) {
+        let due = Instant::now() + delay;
+        self.records.push((due, action));
+        self.set_due(due);
+    }
 
-        if self.has_pending_actions() {
-            self.records.sort_by_key(|v| v.0);
+    fn run_pending_actions(&mut self) {
+        while !self.records.is_empty() {
+
+            if let Some(due) = self.due {
+                let sleep_delay = due - Instant::now();
+
+                if sleep_delay > Duration::from_millis(0) {
+                    sleep(sleep_delay);
+                }
+            }
+
+            self.due = None;
 
             let mut i = self.records.len();
-            let instant = Instant::now();
-            self.due = None;
+            self.records.sort_by_key(|v| v.0);
 
             while i > 0 {
                 i -= 1;
 
                 let due = self.records[i].0;
 
-                if due <= instant {
+                if due <= Instant::now() {
                     let mut action = self.records.remove(i).1;
-                    action();
+
+                    if let Some(delay) = action() {
+                        self.schedule_item(action, delay);
+                    }
                 } else {
                     self.set_due(due);
                     break;
@@ -71,11 +88,7 @@ impl ThreadCell {
     }
 
     fn schedule(&mut self, func: Action, delay: Duration) {
-        let mut instant = Instant::now();
-        instant += delay;
-
-        self.records.push((instant, func));
-        self.set_due(instant);
+        self.schedule_item(func, delay);
         self.run_pending_actions();
     }
 
