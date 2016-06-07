@@ -3,6 +3,11 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 use super::scheduler::*;
 
+/// Schedule a func to be executed on the current thread. The action is not
+/// executed immediately but is queued and execute when calling one of the
+/// methods [`run_pending_actions()`](#method.run_pending_actions),
+/// [`run_until_empty()`](#method.run_until_empty).
+#[derive(Copy, Clone)]
 pub struct CurrentThread;
 
 impl CurrentThread {
@@ -10,18 +15,23 @@ impl CurrentThread {
         CurrentThread
     }
 
+    /// Returns true if the schedule queue contains funcs that are due
+    /// to be executed.
     pub fn has_pending_actions(&self) -> bool {
         CURRENT_THREAD.with(|f| f.borrow().has_pending_actions())
     }
 
+    /// Returns true if the schedule queue is empty
     pub fn is_empty(&self) -> bool {
         CURRENT_THREAD.with(|f| f.borrow().is_empty())
     }
 
+    /// Block and execute only the actions that are due to be executed.
     pub fn run_pending_actions(&mut self) {
         CURRENT_THREAD.with(|f| f.borrow_mut().run_pending_actions())
     }
 
+    /// Block and execute all items in the schedule queue until it is completed.
     pub fn run_until_empty(&mut self) {
         CURRENT_THREAD.with(|f| f.borrow_mut().run_until_empty())
     }
@@ -32,12 +42,6 @@ impl Scheduler for CurrentThread {
         where F: FnOnce() + 'static
     {
         CURRENT_THREAD.with(|f| f.borrow_mut().schedule(func, delay))
-    }
-}
-
-impl Clone for CurrentThread {
-    fn clone(&self) -> Self {
-        CurrentThread
     }
 }
 

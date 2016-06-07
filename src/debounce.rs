@@ -5,6 +5,12 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use stream::*;
 
+/// Only emit an item from a [Stream](./trait.Stream.html) if a particular
+/// duration has passed without it emitting another item.
+///
+/// This struct is created by the [debounce()](./trait.Stream.html#method.debounce)
+/// method on [Stream](./trait.Stream.html).
+/// See its documentation for more.
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Debounce<S, SC> {
     delay: Duration,

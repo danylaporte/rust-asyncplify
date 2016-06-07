@@ -79,8 +79,8 @@ pub trait Stream<T> {
         Count::new(self)
     }
 
-    /// Creates a stream that ignores elements received and emit the
-    /// last received items after a delay.
+    /// Only emit an item from a [Stream](./trait.Stream.html) if a particular
+    /// duration has passed without it emitting another item.
     ///
     /// # Examples
     ///
@@ -89,7 +89,7 @@ pub trait Stream<T> {
     /// use asyncplify::schedulers::*;
     /// use std::time::Duration;
     ///
-    /// let scheduler = CurrentThread::current();
+    /// let mut scheduler = CurrentThread::current();
     /// let mut vec = Vec::new();
     ///
     /// (0..10)
@@ -97,8 +97,8 @@ pub trait Stream<T> {
     ///     .debounce(Duration::from_millis(10), scheduler)
     ///     .subscribe_action(|v| vec.push(v));
     ///
-    /// // runs the CurrentThread until all items have been processed.
-    /// CurrentThread::current().run_until_empty();
+    /// // runs the CurrentThread scheduler until all items have been processed.
+    /// scheduler.run_until_empty();
     ///
     /// assert!(vec == [9], "vec = {:?}", vec);
     /// ```
