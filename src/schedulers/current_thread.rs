@@ -1,7 +1,7 @@
 use std::cell::RefCell;
+use std::thread::sleep;
 use std::time::{Duration, Instant};
 use super::scheduler::*;
-use std::thread::sleep;
 
 pub struct CurrentThread;
 
@@ -14,20 +14,71 @@ impl CurrentThread {
         CURRENT_THREAD.with(|f| f.borrow().has_pending_actions())
     }
 
+    pub fn is_empty(&self) -> bool {
+        CURRENT_THREAD.with(|f| f.borrow().is_empty())
+    }
+
     pub fn run_pending_actions(&mut self) {
         CURRENT_THREAD.with(|f| f.borrow_mut().run_pending_actions())
+    }
+
+    pub fn run_until_empty(&mut self) {
+        CURRENT_THREAD.with(|f| f.borrow_mut().run_until_empty())
     }
 }
 
 impl Scheduler for CurrentThread {
-    fn schedule(&mut self, item: Action, delay: Duration) {
-        CURRENT_THREAD.with(|f| f.borrow_mut().schedule(item, delay));
+    fn schedule<F>(&mut self, func: F, delay: Duration)
+        where F: FnOnce() + 'static
+    {
+        CURRENT_THREAD.with(|f| f.borrow_mut().schedule(func, delay))
+    }
+}
+
+impl Clone for CurrentThread {
+    fn clone(&self) -> Self {
+        CurrentThread
+    }
+}
+
+struct RecordItem<F> {
+    func: Option<F>,
+    instant: Instant,
+}
+
+impl<F> RecordItem<F>
+    where F: FnOnce() + 'static
+{
+    fn new(f: F, instant: Instant) -> Self {
+        RecordItem {
+            func: Some(f),
+            instant: instant,
+        }
+    }
+}
+
+trait Record {
+    fn get_instant(&self) -> Instant;
+    fn invoke(&mut self);
+}
+
+impl<F> Record for RecordItem<F>
+    where F: FnOnce()
+{
+    fn get_instant(&self) -> Instant {
+        self.instant
+    }
+
+    fn invoke(&mut self) {
+        if let Some(func) = self.func.take() {
+            func();
+        }
     }
 }
 
 struct ThreadCell {
     due: Option<Instant>,
-    records: Vec<(Instant, Action)>,
+    records: Vec<Box<Record>>,
 }
 
 impl ThreadCell {
@@ -39,6 +90,10 @@ impl ThreadCell {
         }
     }
 
+    fn is_empty(&self) -> bool {
+        self.records.is_empty()
+    }
+
     fn new() -> Self {
         ThreadCell {
             due: None,
@@ -46,50 +101,49 @@ impl ThreadCell {
         }
     }
 
-    fn schedule_item(&mut self, action: Action, delay: Duration) {
-        let due = Instant::now() + delay;
-        self.records.push((due, action));
-        self.set_due(due);
-    }
+    fn run_once(&mut self) {
+        self.records.sort_by_key(|r| r.get_instant());
+        self.due = None;
 
-    fn run_pending_actions(&mut self) {
-        while !self.records.is_empty() {
+        let mut i = self.records.len();
 
-            if let Some(due) = self.due {
-                let sleep_delay = due - Instant::now();
+        while i > 0 {
+            i -= 1;
 
-                if sleep_delay > Duration::from_millis(0) {
-                    sleep(sleep_delay);
-                }
-            }
+            let due = self.records[i].get_instant();
 
-            self.due = None;
+            if due <= Instant::now() {
+                self.records.remove(i).invoke();
 
-            let mut i = self.records.len();
-            self.records.sort_by_key(|v| v.0);
-
-            while i > 0 {
-                i -= 1;
-
-                let due = self.records[i].0;
-
-                if due <= Instant::now() {
-                    let mut action = self.records.remove(i).1;
-
-                    if let Some(delay) = action() {
-                        self.schedule_item(action, delay);
-                    }
-                } else {
-                    self.set_due(due);
-                    break;
-                }
+            } else {
+                self.set_due(due);
+                break;
             }
         }
     }
 
-    fn schedule(&mut self, func: Action, delay: Duration) {
-        self.schedule_item(func, delay);
-        self.run_pending_actions();
+    fn run_pending_actions(&mut self) {
+        while self.due.map_or(false, |v| v <= Instant::now()) {
+            self.run_once();
+        }
+    }
+
+    fn run_until_empty(&mut self) {
+        while let Some(due) = self.due.take() {
+            let now = Instant::now();
+            if due > now {
+                sleep(due - now);
+            }
+            self.run_once();
+        }
+    }
+
+    fn schedule<F>(&mut self, func: F, delay: Duration)
+        where F: FnOnce() + 'static
+    {
+        let due = Instant::now() + delay;
+        self.records.push(Box::new(RecordItem::new(func, due)));
+        self.set_due(due);
     }
 
     fn set_due(&mut self, instant: Instant) {
@@ -97,6 +151,8 @@ impl ThreadCell {
             if due > instant {
                 self.due = Some(instant);
             }
+        } else {
+            self.due = Some(instant);
         }
     }
 }

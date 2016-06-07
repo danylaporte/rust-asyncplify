@@ -1,6 +1,7 @@
 use clonable::*;
 use consumer::*;
 use count::*;
+use debounce::*;
 use dedup_by_key::*;
 use dedup::*;
 use filter::*;
@@ -19,8 +20,10 @@ use skip_last::*;
 use skip_until::*;
 use skip::*;
 use sort::*;
+use std::time::Duration;
 use subscription::*;
 use sum::*;
+use super::schedulers::*;
 use take_last::*;
 use take_until::*;
 use take::*;
@@ -74,6 +77,36 @@ pub trait Stream<T> {
         where Self: Sized
     {
         Count::new(self)
+    }
+
+    /// Creates a stream that ignores elements received and emit the
+    /// last received items after a delay.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// use asyncplify::schedulers::*;
+    /// use std::time::Duration;
+    ///
+    /// let scheduler = CurrentThread::current();
+    /// let mut vec = Vec::new();
+    ///
+    /// (0..10)
+    ///     .into_stream()
+    ///     .debounce(Duration::from_millis(10), scheduler)
+    ///     .subscribe_action(|v| vec.push(v));
+    ///
+    /// // runs the CurrentThread until all items have been processed.
+    /// CurrentThread::current().run_until_empty();
+    ///
+    /// assert!(vec == [9], "vec = {:?}", vec);
+    /// ```
+    fn debounce<SC>(self, delay: Duration, scheduler: SC) -> Debounce<Self, SC>
+        where SC: Scheduler,
+              Self: Sized
+    {
+        Debounce::new(self, delay, scheduler)
     }
 
     /// Creates a stream that emit only immediate new elements.

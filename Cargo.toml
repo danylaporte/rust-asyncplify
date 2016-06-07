@@ -8,3 +8,6 @@ repository = "https://github.com/danylaporte/rust-asyncplify"
 readme = "README.md"
 keywords = ["frp", "reactive", "event", "rx", "async"]
 license = "MIT"
+
+[dependencies]
+atom="*"

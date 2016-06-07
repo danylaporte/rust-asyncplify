@@ -24,9 +24,12 @@
 //! ## License [The MIT License (MIT)](http://opensource.org/licenses/MIT)
 //!
 
+extern crate atom;
+
 mod clonable;
 mod consumer;
 mod count;
+mod debounce;
 mod dedup_by_key;
 mod dedup;
 mod empty;
@@ -46,7 +49,6 @@ mod min_by_key;
 mod min;
 mod once;
 mod scan;
-pub mod schedulers;
 mod skip_last;
 mod skip_until;
 mod skip;
@@ -61,10 +63,12 @@ mod to_vec;
 mod unique_by_key;
 mod unique;
 mod zip;
+pub mod schedulers;
 
 pub use clonable::*;
 pub use consumer::*;
 pub use count::*;
+pub use debounce::*;
 pub use dedup_by_key::*;
 pub use dedup::*;
 pub use empty::*;
