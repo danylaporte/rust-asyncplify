@@ -5,8 +5,8 @@ use super::scheduler::*;
 
 /// Schedule a func to be executed on the current thread. The action is not
 /// executed immediately but is queued and execute when calling one of the
-/// methods [`run_pending_actions()`](#method.run_pending_actions),
-/// [`run_until_empty()`](#method.run_until_empty).
+/// methods [`run_pending_actions()`](./struct.CurrentThread.html#method.run_pending_actions),
+/// [`run_until_empty()`](./struct.CurrentThread.html#method.run_until_empty).
 #[derive(Copy, Clone)]
 pub struct CurrentThread;
 
