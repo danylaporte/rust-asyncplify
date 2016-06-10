@@ -97,14 +97,11 @@ pub trait Stream<T> {
     ///     .debounce(Duration::from_millis(10), scheduler)
     ///     .subscribe_action(|v| vec.push(v));
     ///
-    /// // runs the CurrentThread scheduler until all items have been processed.
-    /// scheduler.run_until_empty();
-    ///
     /// assert!(vec == [9], "vec = {:?}", vec);
     /// ```
     fn debounce<SC>(self, delay: Duration, scheduler: SC) -> Debounce<Self, SC>
         where SC: Scheduler,
-              Self: Sized
+              Self: Sized + 'static
     {
         Debounce::new(self, delay, scheduler)
     }

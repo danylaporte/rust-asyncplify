@@ -1,6 +1,6 @@
 use atom::*;
 use consumer::*;
-use schedulers::Scheduler;
+use schedulers::{CurrentThread, Scheduler};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use stream::*;
@@ -29,17 +29,25 @@ impl<S, SC> Debounce<S, SC> {
 }
 
 impl<S, SC, T> Stream<T> for Debounce<S, SC>
-    where S: Stream<T>,
+    where S: Stream<T> + 'static,
           SC: Scheduler + 'static
 {
     fn consume<C>(self, consumer: C)
         where C: Consumer<T> + 'static
     {
-        self.stream.consume(DebounceState {
-            delay: self.delay,
-            mutex: Arc::new(Mutex::new(Some((consumer, self.scheduler)))),
-            shared_item: Arc::new(Atom::empty()),
-        });
+        let consume = move || {
+            self.stream.consume(DebounceState {
+                delay: self.delay,
+                mutex: Arc::new(Mutex::new(Some((consumer, self.scheduler)))),
+                shared_item: Arc::new(Atom::empty()),
+            })
+        };
+
+        if CurrentThread::current().is_running() {
+            consume();
+        } else {
+            CurrentThread::current().schedule(consume, Duration::new(0, 0));
+        }
     }
 }
 

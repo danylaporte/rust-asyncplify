@@ -3,10 +3,7 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 use super::scheduler::*;
 
-/// Schedule a func to be executed on the current thread. The action is not
-/// executed immediately but is queued and execute when calling one of the
-/// methods [`run_pending_actions()`](./struct.CurrentThread.html#method.run_pending_actions),
-/// [`run_until_empty()`](./struct.CurrentThread.html#method.run_until_empty).
+/// Schedule a func to be executed on the current thread.
 #[derive(Copy, Clone)]
 pub struct CurrentThread;
 
@@ -15,25 +12,53 @@ impl CurrentThread {
         CurrentThread
     }
 
-    /// Returns true if the schedule queue contains funcs that are due
-    /// to be executed.
-    pub fn has_pending_actions(&self) -> bool {
-        CURRENT_THREAD.with(|f| f.borrow().has_pending_actions())
+    pub fn is_running(&self) -> bool {
+        CURRENT_THREAD.with(|f| f.borrow().is_running())
+    }
+}
+
+struct Container {
+    is_running: bool,
+    is_sorted: bool,
+    records: Vec<Box<Record>>,
+}
+
+fn pop_record(refcell: &RefCell<Container>) -> Option<Box<Record>> {
+    refcell.borrow_mut().pop()
+}
+
+impl Container {
+    fn is_running(&self) -> bool {
+        self.is_running
     }
 
-    /// Returns true if the schedule queue is empty
-    pub fn is_empty(&self) -> bool {
-        CURRENT_THREAD.with(|f| f.borrow().is_empty())
+    fn new() -> Self {
+        Container {
+            is_running: false,
+            is_sorted: true,
+            records: Vec::new(),
+        }
     }
 
-    /// Block and execute only the actions that are due to be executed.
-    pub fn run_pending_actions(&mut self) {
-        CURRENT_THREAD.with(|f| f.borrow_mut().run_pending_actions())
+    fn pop(&mut self) -> Option<Box<Record>> {
+        if !self.is_sorted {
+            self.records.sort_by_key(|r| r.get_instant());
+            self.is_sorted = true;
+        }
+
+        let record = self.records.pop();
+        self.is_running = record.is_some();
+
+        record
     }
 
-    /// Block and execute all items in the schedule queue until it is completed.
-    pub fn run_until_empty(&mut self) {
-        CURRENT_THREAD.with(|f| f.borrow_mut().run_until_empty())
+    fn schedule<F>(&mut self, func: F, delay: Duration)
+        where F: FnOnce() + 'static
+    {
+        let due = Instant::now() + delay;
+
+        self.records.push(Box::new(RecordItem::new(func, due)));
+        self.is_sorted = false;
     }
 }
 
@@ -41,7 +66,20 @@ impl Scheduler for CurrentThread {
     fn schedule<F>(&mut self, func: F, delay: Duration)
         where F: FnOnce() + 'static
     {
-        CURRENT_THREAD.with(|f| f.borrow_mut().schedule(func, delay))
+        CURRENT_THREAD.with(|f| {
+            f.borrow_mut().schedule(func, delay);
+
+            while let Some(mut record) = pop_record(f) {
+                let now = Instant::now();
+                let due = record.get_instant();
+
+                if due > now {
+                    sleep(due - now);
+                }
+
+                record.invoke();
+            }
+        });
     }
 }
 
@@ -80,85 +118,5 @@ impl<F> Record for RecordItem<F>
     }
 }
 
-struct ThreadCell {
-    due: Option<Instant>,
-    records: Vec<Box<Record>>,
-}
 
-impl ThreadCell {
-    fn has_pending_actions(&self) -> bool {
-        if let Some(due) = self.due {
-            due <= Instant::now()
-        } else {
-            false
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.records.is_empty()
-    }
-
-    fn new() -> Self {
-        ThreadCell {
-            due: None,
-            records: Vec::new(),
-        }
-    }
-
-    fn run_once(&mut self) {
-        self.records.sort_by_key(|r| r.get_instant());
-        self.due = None;
-
-        let mut i = self.records.len();
-
-        while i > 0 {
-            i -= 1;
-
-            let due = self.records[i].get_instant();
-
-            if due <= Instant::now() {
-                self.records.remove(i).invoke();
-
-            } else {
-                self.set_due(due);
-                break;
-            }
-        }
-    }
-
-    fn run_pending_actions(&mut self) {
-        while self.due.map_or(false, |v| v <= Instant::now()) {
-            self.run_once();
-        }
-    }
-
-    fn run_until_empty(&mut self) {
-        while let Some(due) = self.due.take() {
-            let now = Instant::now();
-            if due > now {
-                sleep(due - now);
-            }
-            self.run_once();
-        }
-    }
-
-    fn schedule<F>(&mut self, func: F, delay: Duration)
-        where F: FnOnce() + 'static
-    {
-        let due = Instant::now() + delay;
-        self.records.push(Box::new(RecordItem::new(func, due)));
-        self.set_due(due);
-    }
-
-    fn set_due(&mut self, instant: Instant) {
-        if let Some(due) = self.due {
-            if due > instant {
-                self.due = Some(instant);
-            }
-        } else {
-            self.due = Some(instant);
-        }
-    }
-}
-
-thread_local!(static CURRENT_THREAD: RefCell<ThreadCell> = RefCell::new(ThreadCell::new()));
+thread_local!(static CURRENT_THREAD: RefCell<Container> = RefCell::new(Container::new()));
