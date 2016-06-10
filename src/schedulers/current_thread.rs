@@ -52,13 +52,15 @@ impl Container {
         record
     }
 
-    fn schedule<F>(&mut self, func: F, delay: Duration)
+    fn schedule<F>(&mut self, func: F, delay: Duration) -> bool
         where F: FnOnce() + 'static
     {
         let due = Instant::now() + delay;
 
         self.records.push(Box::new(RecordItem::new(func, due)));
         self.is_sorted = false;
+
+        self.is_running
     }
 }
 
@@ -67,17 +69,21 @@ impl Scheduler for CurrentThread {
         where F: FnOnce() + 'static
     {
         CURRENT_THREAD.with(|f| {
-            f.borrow_mut().schedule(func, delay);
+            let is_running = f.borrow_mut().schedule(func, delay);
 
-            while let Some(mut record) = pop_record(f) {
-                let now = Instant::now();
-                let due = record.get_instant();
+            if !is_running {
 
-                if due > now {
-                    sleep(due - now);
+                while let Some(mut record) = pop_record(f) {
+                    let now = Instant::now();
+                    let due = record.get_instant();
+
+                    if due > now {
+                        sleep(due - now);
+                    }
+
+                    record.invoke();
                 }
 
-                record.invoke();
             }
         });
     }

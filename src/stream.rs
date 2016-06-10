@@ -89,7 +89,7 @@ pub trait Stream<T> {
     /// use asyncplify::schedulers::*;
     /// use std::time::Duration;
     ///
-    /// let mut scheduler = CurrentThread::current();
+    /// let scheduler = CurrentThread::current();
     /// let mut vec = Vec::new();
     ///
     /// (0..10)
