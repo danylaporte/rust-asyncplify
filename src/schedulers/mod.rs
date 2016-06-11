@@ -2,7 +2,9 @@
 //!
 
 mod current_thread;
+mod event_loop;
 mod scheduler;
 
 pub use self::current_thread::*;
+pub use self::event_loop::EventLoopScheduler;
 pub use self::scheduler::*;
