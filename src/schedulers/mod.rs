@@ -3,6 +3,7 @@
 
 mod current_thread;
 mod event_loop;
+mod schedule_queue;
 mod scheduler;
 
 pub use self::current_thread::*;

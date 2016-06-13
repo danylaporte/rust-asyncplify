@@ -43,7 +43,7 @@ impl<S, SC, T> Stream<T> for Debounce<S, SC>
             })
         };
 
-        if CurrentThread::current().is_running() {
+        if CurrentThread::current().running() {
             consume();
         } else {
             CurrentThread::current().schedule(consume, Duration::new(0, 0));

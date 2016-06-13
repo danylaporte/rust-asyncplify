@@ -1,153 +1,82 @@
-use std::cell::RefCell;
-use std::sync::{Arc, Mutex};
-use std::thread::sleep;
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread::spawn;
 use std::time::{Duration, Instant};
+use super::schedule_queue::*;
 use super::scheduler::*;
 
 #[derive(Clone)]
 pub struct EventLoopScheduler {
-    container: Arc<Mutex<EventLoopContainer>>,
+    queue: Arc<(Mutex<ScheduleQueue<Box<Action + Send>>>, Condvar)>,
 }
 
 impl EventLoopScheduler {
     /// Creates a new EventLoopScheduler
     pub fn new() -> Self {
-        EventLoopScheduler { container: Arc::new(Mutex::new(EventLoopContainer::new())) }
+        let queue = Arc::new((Mutex::new(ScheduleQueue::new()), Condvar::new()));
+
+        let scheduler = EventLoopScheduler { queue: queue.clone() };
+
+        spawn(move || {
+            loop {
+                let mut action = dequeue(&queue);
+                action.invoke();
+            }
+        });
+
+        scheduler
     }
 }
 
-impl Scheduler for EventLoopScheduler {
-    fn schedule<F>(&self, func: F, delay: Duration)
-        where F: FnOnce() + 'static
-    {
-        self.container.schedule(func, delay)
-    }
-}
+fn dequeue(queue: &Arc<(Mutex<ScheduleQueue<Box<Action + Send>>>, Condvar)>) -> Box<Action> {
+    let (ref mutex, ref cvar) = **queue;
+    let mut queue = mutex.lock().unwrap();
 
-pub struct EventLoopContainer {
-    records: Vec<Box<Record>>,
-    running: bool,
-    sorted: bool,
-}
+    loop {
+        if let Some(record) = queue.dequeue() {
+            let now = Instant::now();
 
-impl EventLoopContainer {
-    pub fn new() -> Self {
-        EventLoopContainer {
-            records: Vec::new(),
-            running: false,
-            sorted: true,
+            if record.1 <= now {
+                return record.0;
+            } else {
+                let timeout = now - record.1;
+                let r = cvar.wait_timeout(queue, timeout).unwrap();
+                queue = r.0;
+
+                if r.1.timed_out() {
+                    return record.0;
+                } else {
+                    queue.enqueue(record);
+                    continue;
+                }
+            }
+        } else {
+            queue = cvar.wait(queue).unwrap();
         }
     }
-
-    fn push(&mut self, record: Box<Record>) -> bool {
-        self.records.push(record);
-        self.sorted = false;
-
-        self.running
-    }
-
-    fn pop(&mut self) -> Option<Box<Record>> {
-        if !self.sorted {
-            self.records.sort_by_key(|r| r.get_instant());
-            self.sorted = true;
-        }
-
-        let record = self.records.pop();
-        self.running = record.is_some();
-
-        record
-    }
-
-    pub fn running(&self) -> bool {
-        self.running
-    }
 }
 
-pub trait EventLoop {
-    fn push(&self, record: Box<Record>) -> bool;
-    fn pop(&self) -> Option<Box<Record>>;
-    fn running(&self) -> bool;
-
+impl ParallelScheduler for EventLoopScheduler {
     fn schedule<F>(&self, func: F, delay: Duration)
-        where F: FnOnce() + 'static
+        where F: FnOnce() + Send + 'static
     {
         let due = Instant::now() + delay;
-        let running = self.push(Box::new(RecordItem::new(func, due)));
+        let &(ref mutex, ref cvar) = &*self.queue;
 
-        if !running {
-            while let Some(mut record) = self.pop() {
-                let now = Instant::now();
-                let due = record.get_instant();
-
-                if due > now {
-                    sleep(due - now);
-                }
-
-                record.invoke();
-            }
-        }
+        mutex.lock().unwrap().enqueue((Box::new(Some(func)), due));
+        cvar.notify_one();
     }
 }
 
-impl EventLoop for RefCell<EventLoopContainer> {
-    fn push(&self, record: Box<Record>) -> bool {
-        self.borrow_mut().push(record)
-    }
-
-    fn pop(&self) -> Option<Box<Record>> {
-        self.borrow_mut().pop()
-    }
-
-    fn running(&self) -> bool {
-        self.borrow().running()
-    }
-}
-
-impl EventLoop for Mutex<EventLoopContainer> {
-    fn push(&self, record: Box<Record>) -> bool {
-        self.lock().unwrap().push(record)
-    }
-
-    fn pop(&self) -> Option<Box<Record>> {
-        self.lock().unwrap().pop()
-    }
-
-    fn running(&self) -> bool {
-        self.lock().unwrap().running()
-    }
-}
-
-pub trait Record {
-    fn get_instant(&self) -> Instant;
+trait Action {
     fn invoke(&mut self);
 }
 
-struct RecordItem<F> {
-    func: Option<F>,
-    instant: Instant,
-}
-
-impl<F> RecordItem<F>
-    where F: FnOnce() + 'static
+impl<F> Action for Option<F>
+    where F: FnOnce() + Send
 {
-    fn new(f: F, instant: Instant) -> Self {
-        RecordItem {
-            func: Some(f),
-            instant: instant,
-        }
-    }
-}
-
-impl<F> Record for RecordItem<F>
-    where F: FnOnce()
-{
-    fn get_instant(&self) -> Instant {
-        self.instant
-    }
-
     fn invoke(&mut self) {
-        if let Some(func) = self.func.take() {
-            func();
+        if let Some(action) = self.take() {
+            action();
         }
     }
 }
