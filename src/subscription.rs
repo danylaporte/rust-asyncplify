@@ -1,27 +1,30 @@
 use consumer::*;
 
-/// Represents a subscription to a `Stream`
+/// Represents a subscription to a `[Stream](./trait.Stream.html)`
+/// or a `[ParallelStream](./trait.ParallelStream.html)`
 pub struct Subscription;
 
-/// Represents a subscription to a `Stream` based on an action
+/// Represents a subscription to a `[Stream](./trait.Stream.html)`
+/// or a `[ParallelStream](./trait.ParallelStream.html)` based on an action
 pub struct SubscriptionAction<F> {
     f: F,
 }
 
-/// Represents a subscription to a `Stream` based on a func
+/// Represents a subscription to a `[Stream](./trait.Stream.html)`
+/// or a `[ParallelStream](./trait.ParallelStream.html)` based on a func
 pub struct SubscriptionFunc<F> {
     predicate: F,
 }
 
 impl<F> SubscriptionAction<F> {
-    /// Creates a new `SubscriptionAction`
+    /// Creates a new `[SubscriptionAction](./struct.SubscriptionAction.html)`
     pub fn new(f: F) -> Self {
         SubscriptionAction { f: f }
     }
 }
 
 impl<F> SubscriptionFunc<F> {
-    /// Creates a new `SubscriptionFunc`
+    /// Creates a new `[SubscriptionFunc](./struct.SubscriptionFunc.html)`
     pub fn new(f: F) -> Self {
         SubscriptionFunc { predicate: f }
     }
@@ -29,6 +32,14 @@ impl<F> SubscriptionFunc<F> {
 
 impl<T> Consumer<T> for Subscription {
     fn emit(&mut self, _: T) -> bool {
+        true
+    }
+}
+
+impl<T> ParallelConsumer<T> for Subscription
+    where T: Send
+{
+    fn emit(&self, _: T) -> bool {
         true
     }
 }
@@ -42,10 +53,29 @@ impl<F, T> Consumer<T> for SubscriptionAction<F>
     }
 }
 
+impl<F, T> ParallelConsumer<T> for SubscriptionAction<F>
+    where F: Fn(T) + Send,
+          T: Send
+{
+    fn emit(&self, item: T) -> bool {
+        (self.f)(item);
+        true
+    }
+}
+
 impl<F, T> Consumer<T> for SubscriptionFunc<F>
     where F: FnMut(T) -> bool
 {
     fn emit(&mut self, item: T) -> bool {
+        (self.predicate)(item)
+    }
+}
+
+impl<F, T> ParallelConsumer<T> for SubscriptionFunc<F>
+    where F: Send + Fn(T) -> bool,
+          T: Send
+{
+    fn emit(&self, item: T) -> bool {
         (self.predicate)(item)
     }
 }
