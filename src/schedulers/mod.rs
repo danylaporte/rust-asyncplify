@@ -7,5 +7,5 @@ mod schedule_queue;
 mod scheduler;
 
 pub use self::current_thread::*;
-pub use self::event_loop::EventLoopScheduler;
+pub use self::event_loop::EventLoop;
 pub use self::scheduler::*;

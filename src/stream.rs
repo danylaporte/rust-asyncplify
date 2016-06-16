@@ -15,6 +15,7 @@ use max_by_key::*;
 use max::*;
 use min_by_key::*;
 use min::*;
+use observe_on::*;
 use scan::*;
 use skip_last::*;
 use skip_until::*;
@@ -405,6 +406,13 @@ pub trait Stream<T> {
         where Self: Sized
     {
         MinByKey::new(self, f)
+    }
+
+    fn observe_on_parallel<SC>(self, scheduler: SC) -> SyncToParallelObserveOn<Self, SC>
+        where SC: ParallelScheduler,
+              Self: Sized
+    {
+        SyncToParallelObserveOn::new(self, scheduler)
     }
 
     /// A stream adaptor similar to `fold()` that holds internal state and

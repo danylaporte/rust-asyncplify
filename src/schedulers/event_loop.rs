@@ -5,16 +5,16 @@ use super::schedule_queue::*;
 use super::scheduler::*;
 
 #[derive(Clone)]
-pub struct EventLoopScheduler {
+pub struct EventLoop {
     queue: Arc<(Mutex<ScheduleQueue<Box<Action + Send>>>, Condvar)>,
 }
 
-impl EventLoopScheduler {
-    /// Creates a new EventLoopScheduler
+impl EventLoop {
+    /// Creates a new EventLoop
     pub fn new() -> Self {
         let queue = Arc::new((Mutex::new(ScheduleQueue::new()), Condvar::new()));
 
-        let scheduler = EventLoopScheduler { queue: queue.clone() };
+        let scheduler = EventLoop { queue: queue.clone() };
 
         spawn(move || {
             loop {
@@ -55,7 +55,7 @@ fn dequeue(queue: &Arc<(Mutex<ScheduleQueue<Box<Action + Send>>>, Condvar)>) -> 
     }
 }
 
-impl ParallelScheduler for EventLoopScheduler {
+impl ParallelScheduler for EventLoop {
     fn schedule<F>(&self, func: F, delay: Duration)
         where F: FnOnce() + Send + 'static
     {

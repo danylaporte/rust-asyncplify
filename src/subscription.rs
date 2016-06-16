@@ -1,17 +1,20 @@
 use consumer::*;
 
-/// Represents a subscription to a `[Stream](./trait.Stream.html)`
-/// or a `[ParallelStream](./trait.ParallelStream.html)`
+/// This struct is created by the
+/// [`subscribe()`](./trait.Stream.html#method.subscribe) method on
+/// [Stream](./trait.Stream.html). See its documentation for more.
 pub struct Subscription;
 
-/// Represents a subscription to a `[Stream](./trait.Stream.html)`
-/// or a `[ParallelStream](./trait.ParallelStream.html)` based on an action
+/// This struct is created by the
+/// [`subscribe_action()`](./trait.Stream.html#method.subscribe_action) method on
+/// [Stream](./trait.Stream.html). See its documentation for more.
 pub struct SubscriptionAction<F> {
     f: F,
 }
 
-/// Represents a subscription to a `[Stream](./trait.Stream.html)`
-/// or a `[ParallelStream](./trait.ParallelStream.html)` based on a func
+/// This struct is created by the
+/// [`subscribe_func()`](./trait.Stream.html#method.subscribe_func) method on
+/// [Stream](./trait.Stream.html). See its documentation for more.
 pub struct SubscriptionFunc<F> {
     predicate: F,
 }
@@ -54,7 +57,7 @@ impl<F, T> Consumer<T> for SubscriptionAction<F>
 }
 
 impl<F, T> ParallelConsumer<T> for SubscriptionAction<F>
-    where F: Fn(T) + Send,
+    where F: Fn(T) + Send + Sync,
           T: Send
 {
     fn emit(&self, item: T) -> bool {
@@ -72,7 +75,7 @@ impl<F, T> Consumer<T> for SubscriptionFunc<F>
 }
 
 impl<F, T> ParallelConsumer<T> for SubscriptionFunc<F>
-    where F: Send + Fn(T) -> bool,
+    where F: Send + Sync + Fn(T) -> bool,
           T: Send
 {
     fn emit(&self, item: T) -> bool {
