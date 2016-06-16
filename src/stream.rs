@@ -199,10 +199,9 @@ pub trait Stream<T> {
     ///
     /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
     /// ```
-    fn flat_map<F, SO, O>(self, func: F) -> Flatmap<Self, F, T, SO, O>
+    fn flat_map<F, SO>(self, func: F) -> Flatmap<Self, F, T, SO>
         where Self: Sized,
-              F: FnMut(T) -> SO,
-              SO: Stream<O>
+              F: FnMut(T) -> SO
     {
         Flatmap::new(self, func)
     }
