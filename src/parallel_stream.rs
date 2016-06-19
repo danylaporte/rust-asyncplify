@@ -1,5 +1,6 @@
 use consumer::*;
 use filter::*;
+use inspect::*;
 use observe_on::*;
 use subscription::*;
 use super::schedulers::ParallelScheduler;
@@ -36,6 +37,14 @@ pub trait ParallelStream {
         ParallelFilter::new(self, predicate)
     }
 
+    /// Do something with each element of a stream, passing the value on.
+    /// This is usefull to debug an item.
+    fn inspect<F>(self, func: F) -> ParallelInspect<Self, F>
+        where F: Send + Sync + Fn(&mut Self::Item),
+              Self: Sized
+    {
+        ParallelInspect::new(self, func)
+    }
 
     fn observe_on<SC>(self, scheduler: SC) -> ParallelObserveOn<Self, SC>
         where SC: ParallelScheduler,
