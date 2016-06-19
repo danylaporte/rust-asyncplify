@@ -34,25 +34,29 @@ impl<S, SC> SyncToParallelObserveOn<S, SC> {
     }
 }
 
-impl<S, SC, T> ParallelStream<T> for ParallelObserveOn<S, SC>
-    where S: ParallelStream<T>,
-          SC: ParallelScheduler,
-          T: Send + 'static
+impl<S, SC> ParallelStream for ParallelObserveOn<S, SC>
+    where S: ParallelStream,
+          S::Item: 'static,
+          SC: ParallelScheduler
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: ParallelConsumer<T> + 'static
+        where C: ParallelConsumer<Self::Item> + 'static
     {
         self.stream.consume(ParallelObserveOnState::new(consumer, self.scheduler));
     }
 }
 
-impl<S, SC, T> ParallelStream<T> for SyncToParallelObserveOn<S, SC>
-    where S: Stream<T>,
-          SC: ParallelScheduler,
-          T: Send + 'static
+impl<S, SC> ParallelStream for SyncToParallelObserveOn<S, SC>
+    where S: Stream,
+          S::Item: Send + 'static,
+          SC: ParallelScheduler
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: ParallelConsumer<T> + 'static
+        where C: ParallelConsumer<Self::Item> + 'static
     {
         self.stream.consume(ParallelObserveOnState::new(consumer, self.scheduler));
     }

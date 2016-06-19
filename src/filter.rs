@@ -52,11 +52,15 @@ pub struct ParallelFilter<S, F> {
     predicate: F,
 }
 
-impl<S, F, T> Stream<T> for Filter<S, F>
-    where S: Stream<T>,
-          F: FnMut(&mut T) -> bool
+impl<S, F> Stream for Filter<S, F>
+    where S: Stream,
+          F: FnMut(&mut S::Item) -> bool
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(FilterState {
             consumer: consumer,
             predicate: self.predicate,
@@ -64,12 +68,16 @@ impl<S, F, T> Stream<T> for Filter<S, F>
     }
 }
 
-impl<S, F, T> ParallelStream<T> for ParallelFilter<S, F>
-    where S: ParallelStream<T>,
-          F: Send + Sync + Fn(&mut T) -> bool,
-          T: Send
+impl<S, F> ParallelStream for ParallelFilter<S, F>
+    where S: ParallelStream,
+          F: Send + Sync + Fn(&mut S::Item) -> bool,
+          S::Item: Send
 {
-    fn consume<C: ParallelConsumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: ParallelConsumer<Self::Item>
+    {
         self.stream.consume(FilterState {
             consumer: consumer,
             predicate: self.predicate,

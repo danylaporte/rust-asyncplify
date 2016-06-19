@@ -31,11 +31,15 @@ impl<C, F, T> Consumer<T> for InspectState<C, F>
     }
 }
 
-impl<S, F, T> Stream<T> for Inspect<S, F>
-    where S: Stream<T>,
-          F: FnMut(&mut T)
+impl<S, F> Stream for Inspect<S, F>
+    where S: Stream,
+          F: FnMut(&mut S::Item)
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(InspectState {
             consumer: consumer,
             func: self.func,

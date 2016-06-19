@@ -21,6 +21,8 @@ use skip_last::*;
 use skip_until::*;
 use skip::*;
 use sort::*;
+use std::cmp::Eq;
+use std::hash::Hash;
 use std::time::Duration;
 use subscription::*;
 use sum::*;
@@ -28,11 +30,14 @@ use super::schedulers::*;
 use take_last::*;
 use take_until::*;
 use take::*;
+use to_vec::*;
 use unique_by_key::*;
 use unique::*;
 use zip::*;
 
-pub trait Stream<T> {
+pub trait Stream {
+    type Item;
+
     /// Makes the stream clonable for reuse of the output.
     ///
     /// # Examples
@@ -52,14 +57,14 @@ pub trait Stream<T> {
     /// assert!(vec == [(0, 9)], "vec = {:?}", vec);
     /// assert!(count == 10, "count = {}", count);
     /// ```
-    fn clonable(self) -> Clonable<Self, T>
+    fn clonable(self) -> Clonable<Self>
         where Self: Sized,
-              T: Clone
+              Self::Item: Clone
     {
         Clonable::new(self)
     }
 
-    fn consume<C: Consumer<T>>(self, consumer: C);
+    fn consume<C: Consumer<Self::Item>>(self, consumer: C);
 
     /// Count the number of items received.
     ///
@@ -74,7 +79,7 @@ pub trait Stream<T> {
     ///     .into_vec();
     /// assert!(vec == [10], "vec = {:?}", vec);
     /// ```
-    fn count(self) -> Count<Self, T>
+    fn count(self) -> Count<Self>
         where Self: Sized
     {
         Count::new(self)
@@ -145,9 +150,9 @@ pub trait Stream<T> {
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
     /// ```
-    fn dedup_by_key<F, K>(self, key_selector: F) -> DedupByKey<Self, F, K>
+    fn dedup_by_key<F, K>(self, key_selector: F) -> DedupByKey<Self, F>
         where Self: Sized,
-              F: FnMut(&T) -> K
+              F: FnMut(&Self::Item) -> K
     {
         DedupByKey::new(self, key_selector)
     }
@@ -173,7 +178,7 @@ pub trait Stream<T> {
     /// ```
     fn filter<F>(self, predicate: F) -> Filter<Self, F>
         where Self: Sized,
-              F: FnMut(&mut T) -> bool
+              F: FnMut(&mut Self::Item) -> bool
     {
         Filter::new(self, predicate)
     }
@@ -199,9 +204,10 @@ pub trait Stream<T> {
     ///
     /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
     /// ```
-    fn flat_map<F, SO>(self, func: F) -> Flatmap<Self, F, T, SO>
+    fn flat_map<F, SO>(self, func: F) -> Flatmap<Self, F>
         where Self: Sized,
-              F: FnMut(T) -> SO
+              F: FnMut(Self::Item) -> SO,
+              SO: Stream
     {
         Flatmap::new(self, func)
     }
@@ -231,9 +237,9 @@ pub trait Stream<T> {
     ///
     /// assert!(v == 45, "v = {}", v);
     /// ```
-    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, T, F, O>
+    fn fold<O, F>(self, initial: O, func: F) -> Fold<Self, F, O>
         where Self: Sized,
-              F: FnMut(O, T) -> O
+              F: FnMut(O, Self::Item) -> O
     {
         Fold::new(self, initial, func)
     }
@@ -254,8 +260,10 @@ pub trait Stream<T> {
     /// // This gives 2 groups
     /// assert!(vec == vec!(0, 1), "vec = {:?}", vec);
     /// ```
-    fn group_by<F: FnMut(&V) -> K, K, V>(self, key_selector: F) -> GroupBy<F, K, Self, V>
-        where Self: Sized
+    fn group_by<F, K>(self, key_selector: F) -> GroupBy<F, Self>
+        where Self: Sized,
+              F: FnMut(&Self::Item) -> K,
+              K: Hash + Eq + Clone
     {
         GroupBy::new(self, key_selector)
     }
@@ -263,10 +271,28 @@ pub trait Stream<T> {
     /// Do something with each element of a stream, passing the value on.
     /// This is usefull to debug an item.
     fn inspect<F>(self, func: F) -> Inspect<Self, F>
-        where F: FnMut(&mut T),
+        where F: FnMut(&mut Self::Item),
               Self: Sized
     {
         Inspect::new(self, func)
+    }
+
+    /// Convert the stream into a `Vec`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let vec = (0..5).into_stream().into_vec();
+    /// assert!(vec == [0, 1, 2, 3, 4], "vec = {:?}", vec);
+    /// ```
+    fn into_vec(self) -> Vec<Self::Item>
+        where Self: Sized
+    {
+        let mut v = Vec::new();
+        self.consume(&mut v);
+        v
     }
 
     /// Returns the last value from stream.
@@ -279,7 +305,7 @@ pub trait Stream<T> {
     /// let value = (0..4).into_stream().last_value().unwrap();
     /// assert!(value == 3, "value = {}", value);
     /// ```
-    fn last_value(self) -> Option<T>
+    fn last_value(self) -> Option<Self::Item>
         where Self: Sized
     {
         let mut last = LastValue::new();
@@ -314,9 +340,9 @@ pub trait Stream<T> {
     ///     .into_vec();
     /// assert!(vec == [10, 11, 12, 13], "vec = {:?}", vec);
     /// ```
-    fn map<O, F>(self, func: F) -> Map<Self, F, T, O>
+    fn map<F, O>(self, func: F) -> Map<Self, F>
         where Self: Sized,
-              F: FnMut(T) -> O
+              F: FnMut(Self::Item) -> O
     {
         Map::new(self, func)
     }
@@ -358,8 +384,10 @@ pub trait Stream<T> {
     ///
     /// assert!(value == 0, "value = {:?}", value);
     /// ```
-    fn max_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MaxByKey<Self, F, K>
-        where Self: Sized
+    fn max_by_key<F, K>(self, f: F) -> MaxByKey<Self, F>
+        where Self: Sized,
+              F: FnMut(&Self::Item) -> K,
+              K: PartialOrd
     {
         MaxByKey::new(self, f)
     }
@@ -401,8 +429,10 @@ pub trait Stream<T> {
     ///
     /// assert!(value == 9, "value = {:?}", value);
     /// ```
-    fn min_by_key<F: FnMut(&T) -> K, K>(self, f: F) -> MinByKey<Self, F, K>
-        where Self: Sized
+    fn min_by_key<F, K>(self, f: F) -> MinByKey<Self, F>
+        where Self: Sized,
+              F: FnMut(&Self::Item) -> K,
+              K: PartialOrd
     {
         MinByKey::new(self, f)
     }
@@ -437,9 +467,9 @@ pub trait Stream<T> {
     ///
     /// assert!(vec == [0, 1, 3, 6, 10, 15], "vec = {:?}", vec);
     /// ```
-    fn scan<O, F>(self, initial: O, func: F) -> Scan<Self, T, F, O>
+    fn scan<O, F>(self, initial: O, func: F) -> Scan<Self, F, O>
         where Self: Sized,
-              F: FnMut(O, T) -> O,
+              F: FnMut(O, Self::Item) -> O,
               O: Clone
     {
         Scan::new(self, initial, func)
@@ -512,7 +542,7 @@ pub trait Stream<T> {
     /// ```
     fn skip_until<U>(self, trigger: U) -> SkipUntil<Self, U>
         where Self: Sized,
-              U: Stream<()>
+              U: Stream
     {
         SkipUntil::new(self, trigger)
     }
@@ -547,14 +577,14 @@ pub trait Stream<T> {
 
     fn subscribe_action<F>(self, action: F)
         where Self: Sized,
-              F: FnMut(T)
+              F: FnMut(Self::Item)
     {
         self.consume(SubscriptionAction::new(action));
     }
 
     fn subscribe_func<F>(self, predicate: F)
         where Self: Sized,
-              F: FnMut(T) -> bool
+              F: FnMut(Self::Item) -> bool
     {
         self.consume(SubscriptionFunc::new(predicate));
     }
@@ -647,9 +677,35 @@ pub trait Stream<T> {
     /// ```
     fn take_until<U>(self, trigger: U) -> TakeUntil<Self, U>
         where Self: Sized,
-              U: Stream<()>
+              U: Stream
     {
         TakeUntil::new(self, trigger)
+    }
+
+    /// Bundle incoming elements into a `Vec`. A split function can be specified
+    /// to emit a `Vec` when the splitter returns true. The remaing `Vec` is emited
+    /// only when not empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    ///
+    /// let mut v = Vec::new();
+    ///
+    /// (0..3)
+    ///     .into_stream()
+    ///     .to_vec(|vec| vec.len() == 2)  // split after 2 items
+    ///     .inspect(|vec| v.push(vec.len()))
+    ///     .subscribe();
+    ///
+    /// assert!(v == [2, 1], "v = {:?}", v);
+    /// ```
+    fn to_vec<F>(self, splitter: F) -> ToVec<Self, F>
+        where F: FnMut(&Vec<Self::Item>) -> bool,
+              Self: Sized
+    {
+        ToVec::new(self, splitter)
     }
 
     /// Creates a stream that emit only new elements. If an element has already
@@ -692,9 +748,10 @@ pub trait Stream<T> {
     ///
     /// assert!(vec == [0, 1, 2, 3], "vec = {:?}", vec);
     /// ```
-    fn unique_by_key<F, K>(self, key_selector: F) -> UniqueByKey<Self, F, K>
+    fn unique_by_key<F, K>(self, key_selector: F) -> UniqueByKey<Self, F>
         where Self: Sized,
-              F: FnMut(&T) -> K
+              F: FnMut(&Self::Item) -> K,
+              K: Eq + Hash
     {
         UniqueByKey::new(self, key_selector)
     }

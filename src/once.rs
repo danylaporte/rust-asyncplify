@@ -26,8 +26,12 @@ pub fn once<T>(value: T) -> Once<T> {
     Once { value: value }
 }
 
-impl<T> Stream<T> for Once<T> {
-    fn consume<C: Consumer<T>>(self, mut consumer: C) {
+impl<T> Stream for Once<T> {
+    type Item = T;
+
+    fn consume<C>(self, mut consumer: C)
+        where C: Consumer<Self::Item>
+    {
         consumer.emit(self.value);
     }
 }

@@ -43,11 +43,15 @@ pub struct Min<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Min<S>
-    where S: Stream<T>,
-          T: PartialOrd
+impl<S> Stream for Min<S>
+    where S: Stream,
+          S::Item: PartialOrd
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(MinState {
             consumer: consumer,
             value: None,

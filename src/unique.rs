@@ -9,15 +9,19 @@ pub struct Unique<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Unique<S>
-    where S: Stream<T>,
-          T: Clone + Eq + Hash
+impl<S> Stream for Unique<S>
+    where S: Stream,
+          S::Item: Clone + Eq + Hash
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(UniqueState {
             consumer: consumer,
             hashset: HashSet::new(),
-        })
+        });
     }
 }
 

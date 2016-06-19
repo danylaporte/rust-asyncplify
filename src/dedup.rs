@@ -7,11 +7,15 @@ pub struct Dedup<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Dedup<S>
-    where S: Stream<T>,
-          T: Clone + Eq
+impl<S> Stream for Dedup<S>
+    where S: Stream,
+          S::Item: Clone + Eq
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(DedupState {
             consumer: consumer,
             last: None,

@@ -7,28 +7,30 @@ use stream::*;
 type Consumers<T> = Rc<RefCell<Vec<Box<Consumer<T>>>>>;
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct Clonable<S, T>
-    where S: Stream<T>,
-          T: Clone
+pub struct Clonable<S>
+    where S: Stream,
+          S::Item: Clone
 {
-    stream: Option<Rc<ClonableStream<S, T>>>,
+    stream: Option<Rc<ClonableStream<S>>>,
 }
 
-impl<S, T> Clonable<S, T>
-    where S: Stream<T>,
-          T: Clone
+impl<S> Clonable<S>
+    where S: Stream,
+          S::Item: Clone
 {
     pub fn new(stream: S) -> Self {
         Clonable { stream: Some(Rc::new(ClonableStream::new(stream))) }
     }
 }
 
-impl<S, T> Stream<T> for Clonable<S, T>
-    where S: Stream<T>,
-          T: Clone
+impl<S> Stream for Clonable<S>
+    where S: Stream,
+          S::Item: Clone
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<T> + 'static
+        where C: Consumer<Self::Item> + 'static
     {
         if let Some(ref stream) = self.stream {
             stream.consumers.borrow_mut().push(Box::new(consumer));
@@ -36,18 +38,18 @@ impl<S, T> Stream<T> for Clonable<S, T>
     }
 }
 
-impl<S, T> Clone for Clonable<S, T>
-    where S: Stream<T>,
-          T: Clone
+impl<S> Clone for Clonable<S>
+    where S: Stream,
+          S::Item: Clone
 {
     fn clone(&self) -> Self {
         Clonable { stream: self.stream.clone() }
     }
 }
 
-impl<S, T> Drop for Clonable<S, T>
-    where S: Stream<T>,
-          T: Clone
+impl<S> Drop for Clonable<S>
+    where S: Stream,
+          S::Item: Clone
 {
     fn drop(&mut self) {
         let stream = replace(&mut self.stream, None).unwrap();
@@ -61,12 +63,16 @@ impl<S, T> Drop for Clonable<S, T>
     }
 }
 
-struct ClonableStream<S, T> {
-    consumers: Consumers<T>,
+struct ClonableStream<S>
+    where S: Stream
+{
+    consumers: Consumers<S::Item>,
     stream: S,
 }
 
-impl<S, T> ClonableStream<S, T> {
+impl<S> ClonableStream<S>
+    where S: Stream
+{
     fn new(stream: S) -> Self {
         ClonableStream {
             consumers: Rc::new(RefCell::new(Vec::new())),

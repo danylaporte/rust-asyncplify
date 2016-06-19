@@ -19,6 +19,8 @@ use stream::*;
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
 pub struct Empty;
 
-impl Stream<()> for Empty {
+impl Stream for Empty {
+    type Item = ();
+
     fn consume<C: Consumer<()>>(self, _: C) {}
 }

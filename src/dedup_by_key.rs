@@ -1,21 +1,23 @@
 use consumer::*;
 use std::cmp::Eq;
-use std::marker::PhantomData;
 use stream::*;
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct DedupByKey<S, F, K> {
+pub struct DedupByKey<S, F> {
     key_selector: F,
-    marker_k: PhantomData<K>,
     stream: S,
 }
 
-impl<S, F, K, T> Stream<T> for DedupByKey<S, F, K>
-    where S: Stream<T>,
-          F: FnMut(&T) -> K,
+impl<S, F, K> Stream for DedupByKey<S, F>
+    where S: Stream,
+          F: FnMut(&S::Item) -> K,
           K: Eq
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(DedupByKeyState {
             consumer: consumer,
             key_selector: self.key_selector,
@@ -49,11 +51,10 @@ impl<C, F, K, T> Consumer<T> for DedupByKeyState<C, F, K>
     }
 }
 
-impl<S, F, K> DedupByKey<S, F, K> {
+impl<S, F> DedupByKey<S, F> {
     pub fn new(stream: S, key_selector: F) -> Self {
         DedupByKey {
             key_selector: key_selector,
-            marker_k: PhantomData::<K>,
             stream: stream,
         }
     }

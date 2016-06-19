@@ -16,6 +16,15 @@ pub struct ToVec<S, F> {
     splitter: F,
 }
 
+impl<S, F> ToVec<S, F> {
+    pub fn new(stream: S, splitter: F) -> Self {
+        ToVec {
+            stream: stream,
+            splitter: splitter,
+        }
+    }
+}
+
 impl<C, F, T> Drop for ToVecState<C, F, T>
     where C: Consumer<Vec<T>>
 {
@@ -43,11 +52,15 @@ impl<C, F, T> Consumer<T> for ToVecState<C, F, T>
     }
 }
 
-impl<S, F, T> Stream<Vec<T>> for ToVec<S, F>
-    where S: Stream<T>,
-          F: FnMut(&Vec<T>) -> bool
+impl<S, F> Stream for ToVec<S, F>
+    where S: Stream,
+          F: FnMut(&Vec<S::Item>) -> bool
 {
-    fn consume<C: Consumer<Vec<T>>>(self, consumer: C) {
+    type Item = Vec<S::Item>;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(ToVecState {
             consumer: consumer,
             splitter: self.splitter,
@@ -55,36 +68,3 @@ impl<S, F, T> Stream<Vec<T>> for ToVec<S, F>
         });
     }
 }
-
-pub trait ToVecStream<T>: Stream<T> {
-    /// Bundle incoming elements into a `Vec`. A split function can be specified
-    /// to emit a `Vec` when the splitter returns true. The remaing `Vec` is emited
-    /// only when not empty.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use asyncplify::*;
-    ///
-    /// let mut v = Vec::new();
-    ///
-    /// (0..3)
-    ///     .into_stream()
-    ///     .to_vec(|vec| vec.len() == 2)  // split after 2 items
-    ///     .inspect(|vec| v.push(vec.len()))
-    ///     .subscribe();
-    ///
-    /// assert!(v == [2, 1], "v = {:?}", v);
-    /// ```
-    fn to_vec<F>(self, splitter: F) -> ToVec<Self, F>
-        where F: FnMut(&Vec<T>) -> bool,
-              Self: Sized
-    {
-        ToVec {
-            stream: self,
-            splitter: splitter,
-        }
-    }
-}
-
-impl<S, T> ToVecStream<T> for S where S: Stream<T> {}

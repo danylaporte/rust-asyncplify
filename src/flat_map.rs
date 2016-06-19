@@ -1,21 +1,17 @@
 use consumer::*;
 use std::cell::RefCell;
-use std::marker::PhantomData;
 use std::rc::Rc;
 use stream::*;
 
-struct FlatmapState<C, F, I, O, S> {
+struct FlatmapState<C, F> {
     child: Rc<RefCell<Option<C>>>,
     func: F,
-    marker_i: PhantomData<I>,
-    marker_o: PhantomData<O>,
-    marker_s: PhantomData<S>,
 }
 
-impl<C, F, I, O, S> Consumer<I> for FlatmapState<C, F, I, O, S>
+impl<C, F, I, S> Consumer<I> for FlatmapState<C, F>
     where F: FnMut(I) -> S,
-          C: Consumer<O>,
-          S: Stream<O>
+          C: Consumer<S::Item>,
+          S: Stream
 {
     fn emit(&mut self, item: I) -> bool {
         if self.child.borrow().is_none() {
@@ -46,38 +42,33 @@ impl<C, T> Consumer<T> for Rc<RefCell<Option<C>>>
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct Flatmap<S, F, I, SO> {
+pub struct Flatmap<S, F> {
     func: F,
-    marker_i: PhantomData<I>,
-    marker_so: PhantomData<SO>,
     stream: S,
 }
 
-impl<S, F, I, SO> Flatmap<S, F, I, SO> {
+impl<S, F> Flatmap<S, F> {
     pub fn new(stream: S, func: F) -> Self {
         Flatmap {
             func: func,
-            marker_i: PhantomData::<I>,
-            marker_so: PhantomData::<SO>,
             stream: stream,
         }
     }
 }
 
-impl<S, I, F, SO, O> Stream<O> for Flatmap<S, F, I, SO>
-    where S: Stream<I>,
-          F: FnMut(I) -> SO,
-          SO: Stream<O>
+impl<S, F, SO> Stream for Flatmap<S, F>
+    where S: Stream,
+          F: FnMut(S::Item) -> SO,
+          SO: Stream
 {
+    type Item = SO::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<O>
+        where C: Consumer<Self::Item>
     {
         self.stream.consume(FlatmapState {
             child: Rc::new(RefCell::new(Some(consumer))),
             func: self.func,
-            marker_i: PhantomData::<I>,
-            marker_o: PhantomData::<O>,
-            marker_s: PhantomData::<SO>,
         });
     }
 }

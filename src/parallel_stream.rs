@@ -4,8 +4,10 @@ use observe_on::*;
 use subscription::*;
 use super::schedulers::ParallelScheduler;
 
-pub trait ParallelStream<T: Send> {
-    fn consume<C: ParallelConsumer<T>>(self, C);
+pub trait ParallelStream {
+    type Item: Send;
+
+    fn consume<C>(self, C) where C: ParallelConsumer<Self::Item>;
 
     /// Creates a stream which uses a closure to determine if an element should
     /// be emitted. The closure must return true or false. `filter()` creates a
@@ -29,7 +31,7 @@ pub trait ParallelStream<T: Send> {
     /// ```
     fn filter<F>(self, predicate: F) -> ParallelFilter<Self, F>
         where Self: Sized,
-              F: Send + Fn(&mut T) -> bool
+              F: Send + Fn(&mut Self::Item) -> bool
     {
         ParallelFilter::new(self, predicate)
     }
@@ -50,14 +52,14 @@ pub trait ParallelStream<T: Send> {
 
     fn subscribe_action<F>(self, action: F)
         where Self: Sized,
-              F: Fn(T) + Send + Sync
+              F: Fn(Self::Item) + Send + Sync
     {
         self.consume(SubscriptionAction::new(action));
     }
 
     fn subscribe_func<F>(self, predicate: F)
         where Self: Sized,
-              F: Send + Sync + Fn(T) -> bool
+              F: Send + Sync + Fn(Self::Item) -> bool
     {
         self.consume(SubscriptionFunc::new(predicate));
     }

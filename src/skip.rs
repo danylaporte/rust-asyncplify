@@ -30,10 +30,14 @@ impl<C, T> Consumer<T> for SkipState<C>
     }
 }
 
-impl<S, T> Stream<T> for Skip<S>
-    where S: Stream<T>
+impl<S> Stream for Skip<S>
+    where S: Stream
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(SkipState {
             consumer: consumer,
             count: self.count,

@@ -1,6 +1,5 @@
 use consumer::*;
 use std::cmp::PartialOrd;
-use std::marker::PhantomData;
 use stream::*;
 
 struct MaxByKeyState<C, T, F, K>
@@ -46,18 +45,21 @@ impl<C, T, F, K> Drop for MaxByKeyState<C, T, F, K>
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct MaxByKey<S, F, K> {
+pub struct MaxByKey<S, F> {
     f: F,
-    marker_k: PhantomData<K>,
     stream: S,
 }
 
-impl<S, T, F, K> Stream<T> for MaxByKey<S, F, K>
-    where S: Stream<T>,
-          F: FnMut(&T) -> K,
+impl<S, F, K> Stream for MaxByKey<S, F>
+    where S: Stream,
+          F: FnMut(&S::Item) -> K,
           K: PartialOrd
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(MaxByKeyState {
             consumer: consumer,
             f: self.f,
@@ -66,11 +68,10 @@ impl<S, T, F, K> Stream<T> for MaxByKey<S, F, K>
     }
 }
 
-impl<S, F, K> MaxByKey<S, F, K> {
+impl<S, F> MaxByKey<S, F> {
     pub fn new(stream: S, f: F) -> Self {
         MaxByKey {
             f: f,
-            marker_k: PhantomData::<K>,
             stream: stream,
         }
     }

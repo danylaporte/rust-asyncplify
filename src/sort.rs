@@ -51,12 +51,14 @@ impl<C, T> Drop for SortState<C, T>
     }
 }
 
-impl<S, T> Stream<T> for Sort<S>
-    where S: Stream<T>,
-          T: Ord
+impl<S> Stream for Sort<S>
+    where S: Stream,
+          S::Item: Ord
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<T>
+        where C: Consumer<Self::Item>
     {
         self.stream.consume(SortState {
             consumer: consumer,

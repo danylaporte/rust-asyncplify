@@ -34,9 +34,11 @@ impl Interval {
     }
 }
 
-impl Stream<()> for Interval {
+impl Stream for Interval {
+    type Item = ();
+
     fn consume<C>(self, mut consumer: C)
-        where C: Consumer<()>
+        where C: Consumer<Self::Item>
     {
         loop {
             thread::sleep(self.period);

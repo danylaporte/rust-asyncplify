@@ -38,12 +38,14 @@ impl<C, T> Consumer<T> for SkipUntilState<C>
     }
 }
 
-impl<S, T, U> Stream<T> for SkipUntil<S, U>
-    where S: Stream<T>,
-          U: Stream<()>
+impl<S, T> Stream for SkipUntil<S, T>
+    where S: Stream,
+          T: Stream
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<T>
+        where C: Consumer<Self::Item>
     {
         let is_opened = Rc::new(Cell::new(false));
 

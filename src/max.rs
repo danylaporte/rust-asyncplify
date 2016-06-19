@@ -43,11 +43,15 @@ pub struct Max<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Max<S>
-    where S: Stream<T>,
-          T: PartialOrd
+impl<S> Stream for Max<S>
+    where S: Stream,
+          S::Item: PartialOrd
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(MaxState {
             consumer: consumer,
             value: None,

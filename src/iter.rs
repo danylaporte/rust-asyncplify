@@ -7,10 +7,14 @@ pub struct IterStream<I> {
     iterator: I,
 }
 
-impl<I, T> Stream<T> for IterStream<I>
-    where I: Iterator<Item = T>
+impl<I> Stream for IterStream<I>
+    where I: Iterator
 {
-    fn consume<C: Consumer<T>>(self, mut consumer: C) {
+    type Item = I::Item;
+
+    fn consume<C>(self, mut consumer: C)
+        where C: Consumer<Self::Item>
+    {
         for i in self.iterator {
             if !consumer.emit(i) {
                 break;

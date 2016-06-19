@@ -1,5 +1,4 @@
 use consumer::*;
-use std::marker::PhantomData;
 use stream::*;
 
 struct CountState<C>
@@ -27,15 +26,18 @@ impl<C> Drop for CountState<C>
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct Count<S, T> {
+pub struct Count<S> {
     stream: S,
-    marker_t: PhantomData<T>,
 }
 
-impl<S, T> Stream<u64> for Count<S, T>
-    where S: Stream<T>
+impl<S> Stream for Count<S>
+    where S: Stream
 {
-    fn consume<C: Consumer<u64>>(self, consumer: C) {
+    type Item = u64;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<u64>
+    {
         self.stream.consume(CountState {
             consumer: consumer,
             value: 0,
@@ -43,11 +45,8 @@ impl<S, T> Stream<u64> for Count<S, T>
     }
 }
 
-impl<S, T> Count<S, T> {
+impl<S> Count<S> {
     pub fn new(stream: S) -> Self {
-        Count {
-            stream: stream,
-            marker_t: PhantomData::<T>,
-        }
+        Count { stream: stream }
     }
 }

@@ -38,12 +38,14 @@ impl<C, T> Consumer<T> for TakeUntilState<C>
     }
 }
 
-impl<S, T, U> Stream<T> for TakeUntil<S, U>
-    where S: Stream<T>,
-          U: Stream<()>
+impl<S, T> Stream for TakeUntil<S, T>
+    where S: Stream,
+          T: Stream
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<T>
+        where C: Consumer<Self::Item>
     {
         let is_closed = Rc::new(Cell::new(false));
 

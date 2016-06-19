@@ -2,7 +2,6 @@ use consumer::*;
 use std::cell::RefCell;
 use std::collections::hash_map::*;
 use std::hash::Hash;
-use std::marker::PhantomData;
 use std::rc::Rc;
 use stream::*;
 
@@ -11,10 +10,14 @@ pub struct Group<K, V> {
     key: K,
 }
 
-impl<K, V> Stream<V> for Group<K, V>
+impl<K, V> Stream for Group<K, V>
     where V: 'static
 {
-    fn consume<C: Consumer<V> + 'static>(self, consumer: C) {
+    type Item = V;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item> + 'static
+    {
         *self.consumer.borrow_mut() = Some(Box::new(consumer));
     }
 }
@@ -85,30 +88,30 @@ impl<C, F, K, V> Consumer<V> for GroupByState<C, F, K, V>
 }
 
 #[must_use = "stream adaptors are lazy and do nothing unless consumed"]
-pub struct GroupBy<F, K, S, V> {
+pub struct GroupBy<F, S> {
     key_selector: F,
-    marker_k: PhantomData<K>,
-    marker_v: PhantomData<V>,
     stream: S,
 }
 
-impl<F, K, S, V> GroupBy<F, K, S, V> {
+impl<F, S> GroupBy<F, S> {
     pub fn new(stream: S, key_selector: F) -> Self {
         GroupBy {
             key_selector: key_selector,
-            marker_k: PhantomData::<K>,
-            marker_v: PhantomData::<V>,
             stream: stream,
         }
     }
 }
 
-impl<F, K, S, V> Stream<Group<K, V>> for GroupBy<F, K, S, V>
-    where F: FnMut(&V) -> K,
-          K: Clone + Hash + Eq,
-          S: Stream<V>
+impl<F, K, S> Stream for GroupBy<F, S>
+    where S: Stream,
+          F: FnMut(&S::Item) -> K,
+          K: Clone + Hash + Eq
 {
-    fn consume<C: Consumer<Group<K, V>>>(self, consumer: C) {
+    type Item = Group<K, S::Item>;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Group<K, S::Item>>
+    {
         self.stream.consume(GroupByState {
             consumer: consumer,
             hashmap: HashMap::new(),

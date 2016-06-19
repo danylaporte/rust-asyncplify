@@ -29,10 +29,14 @@ impl<C, T> Consumer<T> for TakeState<C>
     }
 }
 
-impl<S, T> Stream<T> for Take<S>
-    where S: Stream<T>
+impl<S> Stream for Take<S>
+    where S: Stream
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(TakeState {
             consumer: consumer,
             count: self.count,

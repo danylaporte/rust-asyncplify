@@ -28,12 +28,14 @@ impl<S, SC> Debounce<S, SC> {
     }
 }
 
-impl<S, SC, T> Stream<T> for Debounce<S, SC>
-    where S: Stream<T> + 'static,
+impl<S, SC> Stream for Debounce<S, SC>
+    where S: Stream + 'static,
           SC: Scheduler + 'static
 {
+    type Item = S::Item;
+
     fn consume<C>(self, consumer: C)
-        where C: Consumer<T> + 'static
+        where C: Consumer<Self::Item> + 'static
     {
         let consume = move || {
             self.stream.consume(DebounceState {

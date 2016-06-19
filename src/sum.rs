@@ -40,11 +40,15 @@ pub struct Sum<S> {
     stream: S,
 }
 
-impl<S, T> Stream<T> for Sum<S>
-    where S: Stream<T>,
-          T: AddAssign + Default
+impl<S> Stream for Sum<S>
+    where S: Stream,
+          S::Item: AddAssign + Default
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         self.stream.consume(SumState {
             consumer: consumer,
             value: Default::default(),

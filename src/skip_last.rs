@@ -37,10 +37,14 @@ impl<C, T> Consumer<T> for SkipLastState<C, T>
     }
 }
 
-impl<S, T> Stream<T> for SkipLast<S>
-    where S: Stream<T>
+impl<S> Stream for SkipLast<S>
+    where S: Stream
 {
-    fn consume<C: Consumer<T>>(self, consumer: C) {
+    type Item = S::Item;
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         if self.count == 0 {
             self.stream.consume(consumer);
         } else {

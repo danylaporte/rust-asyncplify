@@ -37,11 +37,15 @@ impl<L, R> Zip<L, R> {
     }
 }
 
-impl<L, LS, R, RS> Stream<(L, R)> for Zip<LS, RS>
-    where LS: Stream<L>,
-          RS: Stream<R>
+impl<L, R> Stream for Zip<L, R>
+    where L: Stream,
+          R: Stream
 {
-    fn consume<C: Consumer<(L, R)>>(self, consumer: C) {
+    type Item = (L::Item, R::Item);
+
+    fn consume<C>(self, consumer: C)
+        where C: Consumer<Self::Item>
+    {
         let common = Rc::new(RefCell::new(Common::new(consumer)));
         self.left.consume(ChildLeft { common: common.clone() });
         self.right.consume(ChildRight { common: common });
