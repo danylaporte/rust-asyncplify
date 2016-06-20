@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TakeUntil","Emit items until it receive an item from another stream."]]});

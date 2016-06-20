@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ParallelFilter` struct in crate `asyncplify`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ParallelFilter">
+
+    <title>asyncplify::ParallelFilter - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>asyncplify</a></p><script>window.sidebarCurrent = {name: 'ParallelFilter', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>asyncplify</a>::<wbr><a class='struct' href=''>ParallelFilter</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-299' class='srclink' href='../src/asyncplify/src/filter.rs.html#50-53' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
+pub struct ParallelFilter&lt;S, F&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>This struct is created by the
+<a href="./trait.ParallelStream.html#method.filter"><code>filter()</code></a> method on
+<a href="./trait.ParallelStream.html">ParallelStream</a>. See its documentation for more.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;S, F&gt; <a class='struct' href='../asyncplify/struct.ParallelFilter.html' title='asyncplify::ParallelFilter'>ParallelFilter</a>&lt;S, F&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(stream: S, predicate: F) -&gt; Self</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;S, F&gt; <a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>ParallelStream</a> for <a class='struct' href='../asyncplify/struct.ParallelFilter.html' title='asyncplify::ParallelFilter'>ParallelFilter</a>&lt;S, F&gt; <span class='where'>where S: <a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>ParallelStream</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;mut S::Item) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, S::Item: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a></span></code></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type <a href='../asyncplify/trait.ParallelStream.html#associatedtype.Item' class='type'>Item</a> = S::Item</code></h4>
+<h4 id='method.consume' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#tymethod.consume' class='fnname'>consume</a>&lt;C&gt;(self, consumer: C) <span class='where'>where C: <a class='trait' href='../asyncplify/trait.ParallelConsumer.html' title='asyncplify::ParallelConsumer'>ParallelConsumer</a>&lt;Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>&gt;</span></code></h4>
+<h4 id='method.filter' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.filter' class='fnname'>filter</a>&lt;F&gt;(self, predicate: F) -&gt; <a class='struct' href='../asyncplify/struct.ParallelFilter.html' title='asyncplify::ParallelFilter'>ParallelFilter</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;mut Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+<h4 id='method.inspect' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.inspect' class='fnname'>inspect</a>&lt;F&gt;(self, func: F) -&gt; <a class='struct' href='../asyncplify/struct.ParallelInspect.html' title='asyncplify::ParallelInspect'>ParallelInspect</a>&lt;Self, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;mut Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>), Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.max' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.max' class='fnname'>max</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.ParallelMax.html' title='asyncplify::ParallelMax'>ParallelMax</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.max_by_key' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.max_by_key' class='fnname'>max_by_key</a>&lt;F, K&gt;(self, f: F) -&gt; <a class='struct' href='../asyncplify/struct.ParallelMaxByKey.html' title='asyncplify::ParallelMaxByKey'>ParallelMaxByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a></span></code></h4>
+<h4 id='method.min_by_key' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.min_by_key' class='fnname'>min_by_key</a>&lt;F, K&gt;(self, f: F) -&gt; <a class='struct' href='../asyncplify/struct.ParallelMinByKey.html' title='asyncplify::ParallelMinByKey'>ParallelMinByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a></span></code></h4>
+<h4 id='method.observe_on' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.observe_on' class='fnname'>observe_on</a>&lt;SC&gt;(self, scheduler: SC) -&gt; <a class='struct' href='../asyncplify/struct.ParallelObserveOn.html' title='asyncplify::ParallelObserveOn'>ParallelObserveOn</a>&lt;Self, SC&gt; <span class='where'>where SC: <a class='trait' href='../asyncplify/schedulers/trait.ParallelScheduler.html' title='asyncplify::schedulers::ParallelScheduler'>ParallelScheduler</a>, Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.subscribe' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.subscribe' class='fnname'>subscribe</a>(self) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.subscribe_action' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.subscribe_action' class='fnname'>subscribe_action</a>&lt;F&gt;(self, action: F) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>) + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a></span></code></h4>
+<h4 id='method.subscribe_func' class='method'><code>fn <a href='../asyncplify/trait.ParallelStream.html#method.subscribe_func' class='fnname'>subscribe_func</a>&lt;F&gt;(self, predicate: F) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html' title='core::ops::Fn'>Fn</a>(Self::<a class='trait' href='../asyncplify/trait.ParallelStream.html' title='asyncplify::ParallelStream'>Item</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "asyncplify";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

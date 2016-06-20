@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Take","Only emit the first n items of a stream."]]});

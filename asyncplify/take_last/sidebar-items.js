@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TakeLast","Emit the last n items of a stream."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Filter","This struct is created by the `filter()` method on Stream. See its documentation for more."],["ParallelFilter","This struct is created by the `filter()` method on ParallelStream. See its documentation for more."]]});

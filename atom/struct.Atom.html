@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Atom` struct in crate `atom`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Atom">
+
+    <title>atom::Atom - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>atom</a></p><script>window.sidebarCurrent = {name: 'Atom', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>atom</a>::<wbr><a class='struct' href=''>Atom</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-12' class='srclink' href='../src/atom/lib.rs.html#27-30' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Atom&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span> {
+    // some fields omitted
+}</pre><div class='docblock'><p>An Atom wraps an AtomicPtr, it allows for safe mutation of an atomic
+into common Rust Types.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;P&gt; <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span></code></h3><div class='impl-items'><h4 id='method.empty' class='method'><code>fn <a href='#method.empty' class='fnname'>empty</a>() -&gt; <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt;</code></h4>
+<div class='docblock'><p>Create a empty Atom</p>
+</div><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(value: P) -&gt; <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt;</code></h4>
+<div class='docblock'><p>Create a new Atomic from Pointer P</p>
+</div><h4 id='method.swap' class='method'><code>fn <a href='#method.swap' class='fnname'>swap</a>(&amp;self, v: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;P&gt;</code></h4>
+<div class='docblock'><p>Swap a new value into the Atom, This will try multiple
+times until it succeeds. The old value will be returned.</p>
+</div><h4 id='method.take' class='method'><code>fn <a href='#method.take' class='fnname'>take</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;P&gt;</code></h4>
+<div class='docblock'><p>Take the value of the Atom replacing it with null pointer
+Returning the contents. If the contents was a <code>null</code> pointer the
+result will be <code>None</code>.</p>
+</div><h4 id='method.set_if_none' class='method'><code>fn <a href='#method.set_if_none' class='fnname'>set_if_none</a>(&amp;self, v: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;P&gt;</code></h4>
+<div class='docblock'><p>This will do a <code>CAS</code> setting the value only if it is NULL
+this will return <code>None</code> if the value was written,
+otherwise a <code>Some(v)</code> will be returned, where the value was
+the same value that you passed into this function</p>
+</div><h4 id='method.replace_and_set_next' class='method'><code>fn <a href='#method.replace_and_set_next' class='fnname'>replace_and_set_next</a>(&amp;self, value: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where P: <a class='trait' href='../atom/trait.GetNextMut.html' title='atom::GetNextMut'>GetNextMut</a>&lt;NextPtr=<a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;P&gt;&gt;</span></code></h4>
+<div class='docblock'><p>Take the current content, write it into P then do a CAS to extent this
+Atom with the previous contents. This can be used to create a LIFO</p>
+
+<p>Returns true if this set this migrated the Atom from null.</p>
+</div><h4 id='method.is_none' class='method'><code>fn <a href='#method.is_none' class='fnname'>is_none</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Check to see if an atom is None</p>
+
+<p>This only means that the contents was None when it was measured</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;P&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Error.html' title='core::fmt::Error'>Error</a>&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;P&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html' title='core::ops::Drop'>Drop</a> for <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span></code></h3><div class='impl-items'><h4 id='method.drop' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;P&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Send.html' title='core::marker::Send'>Send</a> for <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;P&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html' title='core::marker::Sync'>Sync</a> for <a class='struct' href='../atom/struct.Atom.html' title='atom::Atom'>Atom</a>&lt;P&gt; <span class='where'>where P: <a class='trait' href='../atom/trait.IntoRawPtr.html' title='atom::IntoRawPtr'>IntoRawPtr</a> + <a class='trait' href='../atom/trait.FromRawPtr.html' title='atom::FromRawPtr'>FromRawPtr</a></span></code></h3><div class='impl-items'></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "atom";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

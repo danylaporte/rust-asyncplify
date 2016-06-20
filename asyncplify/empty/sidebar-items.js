@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Empty","A `Stream` that do not emits any element."],["ParallelEmpty","A `ParallelStream` that do not emits any element."]]});

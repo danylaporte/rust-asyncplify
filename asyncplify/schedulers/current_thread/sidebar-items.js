@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CurrentThread","Schedule a func to be executed on the current thread."]]});

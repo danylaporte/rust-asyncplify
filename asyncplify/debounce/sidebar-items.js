@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Debounce","Only emit an item from a Stream if a particular duration has passed without it emitting another item."]]});

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `GroupBy` struct in crate `asyncplify`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, GroupBy">
+
+    <title>asyncplify::GroupBy - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>asyncplify</a></p><script>window.sidebarCurrent = {name: 'GroupBy', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>asyncplify</a>::<wbr><a class='struct' href=''>GroupBy</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-492' class='srclink' href='../src/asyncplify/src/group_by.rs.html#91-94' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>#[must_use = "stream adaptors are lazy and do nothing unless consumed"]
+pub struct GroupBy&lt;F, S&gt; {
+    // some fields omitted
+}</pre><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;F, S&gt; <a class='struct' href='../asyncplify/struct.GroupBy.html' title='asyncplify::GroupBy'>GroupBy</a>&lt;F, S&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(stream: S, key_selector: F) -&gt; Self</code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;F, K, S&gt; <a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Stream</a> for <a class='struct' href='../asyncplify/struct.GroupBy.html' title='asyncplify::GroupBy'>GroupBy</a>&lt;F, S&gt; <span class='where'>where S: <a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Stream</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;S::Item) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a></span></code></h3><div class='impl-items'><h4 id='associatedtype.Item' class='type'><code>type <a href='../asyncplify/trait.Stream.html#associatedtype.Item' class='type'>Item</a> = <a class='struct' href='../asyncplify/struct.Group.html' title='asyncplify::Group'>Group</a>&lt;K, S::Item&gt;</code></h4>
+<h4 id='method.consume' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#tymethod.consume' class='fnname'>consume</a>&lt;C&gt;(self, consumer: C) <span class='where'>where C: <a class='trait' href='../asyncplify/trait.Consumer.html' title='asyncplify::Consumer'>Consumer</a>&lt;<a class='struct' href='../asyncplify/struct.Group.html' title='asyncplify::Group'>Group</a>&lt;K, S::Item&gt;&gt;</span></code></h4>
+<h4 id='method.clonable' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.clonable' class='fnname'>clonable</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Clonable.html' title='asyncplify::Clonable'>Clonable</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h4>
+<h4 id='method.count' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.count' class='fnname'>count</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Count.html' title='asyncplify::Count'>Count</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.debounce' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.debounce' class='fnname'>debounce</a>&lt;SC&gt;(self, delay: <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>, scheduler: SC) -&gt; <a class='struct' href='../asyncplify/struct.Debounce.html' title='asyncplify::Debounce'>Debounce</a>&lt;Self, SC&gt; <span class='where'>where SC: <a class='trait' href='../asyncplify/schedulers/trait.Scheduler.html' title='asyncplify::schedulers::Scheduler'>Scheduler</a>, Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> + 'static</span></code></h4>
+<h4 id='method.dedup' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.dedup' class='fnname'>dedup</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Dedup.html' title='asyncplify::Dedup'>Dedup</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.dedup_by_key' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.dedup_by_key' class='fnname'>dedup_by_key</a>&lt;F, K&gt;(self, key_selector: F) -&gt; <a class='struct' href='../asyncplify/struct.DedupByKey.html' title='asyncplify::DedupByKey'>DedupByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; K</span></code></h4>
+<h4 id='method.filter' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.filter' class='fnname'>filter</a>&lt;F&gt;(self, predicate: F) -&gt; <a class='struct' href='../asyncplify/struct.Filter.html' title='asyncplify::Filter'>Filter</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;mut Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+<h4 id='method.flat_map' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.flat_map' class='fnname'>flat_map</a>&lt;F, SO&gt;(self, func: F) -&gt; <a class='struct' href='../asyncplify/struct.Flatmap.html' title='asyncplify::Flatmap'>Flatmap</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; SO, SO: <a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Stream</a></span></code></h4>
+<h4 id='method.fold' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.fold' class='fnname'>fold</a>&lt;O, F&gt;(self, initial: O, func: F) -&gt; <a class='struct' href='../asyncplify/struct.Fold.html' title='asyncplify::Fold'>Fold</a>&lt;Self, F, O&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(O, Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; O</span></code></h4>
+<h4 id='method.group_by' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.group_by' class='fnname'>group_by</a>&lt;F, K&gt;(self, key_selector: F) -&gt; <a class='struct' href='../asyncplify/struct.GroupBy.html' title='asyncplify::GroupBy'>GroupBy</a>&lt;F, Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h4>
+<h4 id='method.inspect' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.inspect' class='fnname'>inspect</a>&lt;F&gt;(self, func: F) -&gt; <a class='struct' href='../asyncplify/struct.Inspect.html' title='asyncplify::Inspect'>Inspect</a>&lt;Self, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;mut Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>), Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.into_vec' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.into_vec' class='fnname'>into_vec</a>(self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.last_value' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.last_value' class='fnname'>last_value</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.map' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.map' class='fnname'>map</a>&lt;F, O&gt;(self, func: F) -&gt; <a class='struct' href='../asyncplify/struct.Map.html' title='asyncplify::Map'>Map</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; O</span></code></h4>
+<h4 id='method.max' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.max' class='fnname'>max</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Max.html' title='asyncplify::Max'>Max</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.max_by_key' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.max_by_key' class='fnname'>max_by_key</a>&lt;F, K&gt;(self, f: F) -&gt; <a class='struct' href='../asyncplify/struct.MaxByKey.html' title='asyncplify::MaxByKey'>MaxByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a></span></code></h4>
+<h4 id='method.min' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.min' class='fnname'>min</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Min.html' title='asyncplify::Min'>Min</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.min_by_key' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.min_by_key' class='fnname'>min_by_key</a>&lt;F, K&gt;(self, f: F) -&gt; <a class='struct' href='../asyncplify/struct.MinByKey.html' title='asyncplify::MinByKey'>MinByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a></span></code></h4>
+<h4 id='method.observe_on_parallel' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.observe_on_parallel' class='fnname'>observe_on_parallel</a>&lt;SC&gt;(self, scheduler: SC) -&gt; <a class='struct' href='../asyncplify/struct.SyncToParallelObserveOn.html' title='asyncplify::SyncToParallelObserveOn'>SyncToParallelObserveOn</a>&lt;Self, SC&gt; <span class='where'>where SC: <a class='trait' href='../asyncplify/schedulers/trait.ParallelScheduler.html' title='asyncplify::schedulers::ParallelScheduler'>ParallelScheduler</a>, Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.scan' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.scan' class='fnname'>scan</a>&lt;O, F&gt;(self, initial: O, func: F) -&gt; <a class='struct' href='../asyncplify/struct.Scan.html' title='asyncplify::Scan'>Scan</a>&lt;Self, F, O&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(O, Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; O, O: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h4>
+<h4 id='method.skip' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.skip' class='fnname'>skip</a>(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../asyncplify/struct.Skip.html' title='asyncplify::Skip'>Skip</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.skip_last' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.skip_last' class='fnname'>skip_last</a>(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../asyncplify/struct.SkipLast.html' title='asyncplify::SkipLast'>SkipLast</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.skip_until' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.skip_until' class='fnname'>skip_until</a>&lt;U&gt;(self, trigger: U) -&gt; <a class='struct' href='../asyncplify/struct.SkipUntil.html' title='asyncplify::SkipUntil'>SkipUntil</a>&lt;Self, U&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, U: <a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Stream</a></span></code></h4>
+<h4 id='method.sort' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.sort' class='fnname'>sort</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Sort.html' title='asyncplify::Sort'>Sort</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.subscribe' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.subscribe' class='fnname'>subscribe</a>(self) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.subscribe_action' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.subscribe_action' class='fnname'>subscribe_action</a>&lt;F&gt;(self, action: F) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>)</span></code></h4>
+<h4 id='method.subscribe_func' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.subscribe_func' class='fnname'>subscribe_func</a>&lt;F&gt;(self, predicate: F) <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></h4>
+<h4 id='method.sum' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.sum' class='fnname'>sum</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Sum.html' title='asyncplify::Sum'>Sum</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.take' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.take' class='fnname'>take</a>(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='struct' href='../asyncplify/struct.Take.html' title='asyncplify::Take'>Take</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.take_last' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.take_last' class='fnname'>take_last</a>(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../asyncplify/struct.TakeLast.html' title='asyncplify::TakeLast'>TakeLast</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.take_until' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.take_until' class='fnname'>take_until</a>&lt;U&gt;(self, trigger: U) -&gt; <a class='struct' href='../asyncplify/struct.TakeUntil.html' title='asyncplify::TakeUntil'>TakeUntil</a>&lt;Self, U&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, U: <a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Stream</a></span></code></h4>
+<h4 id='method.to_vec' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.to_vec' class='fnname'>to_vec</a>&lt;F&gt;(self, splitter: F) -&gt; <a class='struct' href='../asyncplify/struct.ToVec.html' title='asyncplify::ToVec'>ToVec</a>&lt;Self, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.unique' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.unique' class='fnname'>unique</a>(self) -&gt; <a class='struct' href='../asyncplify/struct.Unique.html' title='asyncplify::Unique'>Unique</a>&lt;Self&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+<h4 id='method.unique_by_key' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.unique_by_key' class='fnname'>unique_by_key</a>&lt;F, K&gt;(self, key_selector: F) -&gt; <a class='struct' href='../asyncplify/struct.UniqueByKey.html' title='asyncplify::UniqueByKey'>UniqueByKey</a>&lt;Self, F&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a>, F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::<a class='trait' href='../asyncplify/trait.Stream.html' title='asyncplify::Stream'>Item</a>) -&gt; K, K: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a></span></code></h4>
+<h4 id='method.zip' class='method'><code>fn <a href='../asyncplify/trait.Stream.html#method.zip' class='fnname'>zip</a>&lt;R&gt;(self, right: R) -&gt; <a class='struct' href='../asyncplify/struct.Zip.html' title='asyncplify::Zip'>Zip</a>&lt;Self, R&gt; <span class='where'>where Self: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a></span></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "asyncplify";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
