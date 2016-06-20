@@ -64,6 +64,7 @@ mod take;
 mod to_vec;
 mod unique_by_key;
 mod unique;
+mod utils;
 mod zip;
 pub mod schedulers;
 
