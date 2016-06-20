@@ -1,6 +1,7 @@
 use consumer::*;
 use filter::*;
 use inspect::*;
+use min_by_key::*;
 use observe_on::*;
 use subscription::*;
 use super::schedulers::ParallelScheduler;
@@ -44,6 +45,30 @@ pub trait ParallelStream {
               Self: Sized
     {
         ParallelInspect::new(self, func)
+    }
+
+    /// Returns the element that gives the minimum value from the specified
+    /// function. Returns the lastest element if the comparison determines two
+    /// elements to be equally minimum.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// use asyncplify::schedulers::*;
+    ///
+    /// (0..10)
+    ///     .into_stream()
+    ///     .observe_on_parallel(EventLoop::new())
+    ///     .min_by_key(|v| 10 - *v)
+    ///     .subscribe_action(|v| assert!(v == 9, "v = {}", v));
+    /// ```
+    fn min_by_key<F, K>(self, f: F) -> ParallelMinByKey<Self, F>
+        where Self: Sized,
+              F: Send + Sync + Fn(&Self::Item) -> K,
+              K: PartialOrd + Send
+    {
+        ParallelMinByKey::new(self, f)
     }
 
     fn observe_on<SC>(self, scheduler: SC) -> ParallelObserveOn<Self, SC>
