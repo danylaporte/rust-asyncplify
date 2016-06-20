@@ -1,6 +1,7 @@
 use consumer::*;
 use filter::*;
 use inspect::*;
+use max_by_key::*;
 use min_by_key::*;
 use observe_on::*;
 use subscription::*;
@@ -45,6 +46,30 @@ pub trait ParallelStream {
               Self: Sized
     {
         ParallelInspect::new(self, func)
+    }
+
+    /// Returns the element that gives the maximum value from the specified
+    /// function. Returns the lastest element if the comparison determines two
+    /// elements to be equally maximum.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use asyncplify::*;
+    /// use asyncplify::schedulers::*;
+    ///
+    /// (0..10)
+    ///     .into_stream()
+    ///     .observe_on_parallel(EventLoop::new())
+    ///     .max_by_key(|v| *v)
+    ///     .subscribe_action(|v| assert!(v == 9, "v = {}", v));
+    /// ```
+    fn max_by_key<F, K>(self, f: F) -> ParallelMaxByKey<Self, F>
+        where Self: Sized,
+              F: Send + Sync + Fn(&Self::Item) -> K,
+              K: PartialOrd + Send
+    {
+        ParallelMaxByKey::new(self, f)
     }
 
     /// Returns the element that gives the minimum value from the specified
